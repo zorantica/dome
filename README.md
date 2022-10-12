@@ -30,18 +30,18 @@ It is strongly recommended to install DOME into separate database schema and pro
 Download scripts from "install" folder and install them in provided order.
 
 Scripts: 
-00 - db user (optional).sql
-01 - tables.sql
-02 - sequences.sql
-03 - triggers.sql
-04 - views.sql
-05 - packages.sql
-06 - recompile schema.sql
-20 - admin app user.sql
-25 - data.sql
-50 - APEX application.sql
+- 00 - db user (optional).sql
+- 01 - tables.sql
+- 02 - sequences.sql
+- 03 - triggers.sql
+- 04 - views.sql
+- 05 - packages.sql
+- 06 - recompile schema.sql
+- 20 - admin app user.sql
+- 25 - data.sql
+- 50 - APEX application.sql
 
-###Installation Remarks
+### Installation Remarks
 Script no. 00 is optional and it helps to create database user / schema.
 If You are going to use this script please enter correct user name, password and tablespaces for Your database.
 
