@@ -60,4 +60,4 @@ After all scripts are installed You should be able to login into DOME with usern
 Manual will be provided soon.
 
 ## Quick preview
-![](https://github.com/zorantica/qr-code/blob/master/preview.jpg)
+![](https://github.com/zorantica/dome/blob/main/preview/preview01.jpg)
