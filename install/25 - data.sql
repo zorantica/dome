@@ -40,4 +40,368 @@ Insert into PATCH_TEMPLATES
    (1, 'SINGLE', 'Single installation script', 'pkg_patch_templates.p_single_template_files', null);
 
 
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, TARGET_FOLDER, SOURCE_FOLDER, 
+    RECORD_AS)
+ Values
+   (4, 'APP', 'Application', 'sql/#SCHEMA#/130_apex', '/app/apex/full', 
+    'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (5, 'PAGE', 'Page', 'APP', 'sql/#SCHEMA#/130_apex', 
+    'APPS/APEX/components/f#APP_ID#/application/pages', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (6, 'LOV', 'List of values', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, RECORD_AS)
+ Values
+   (7, 'WORKSPACE', 'APEX Applications workspace', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, RECORD_AS)
+ Values
+   (8, 'DB_SCHEMA', 'Database schema', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (9, 'APP_ITEM', 'Application item', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (10, 'APP_PROCESS', 'Application process', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (11, 'LIST', 'List', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (12, 'BREADCRUMB', 'Breadcrumb', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (43, 'SYNONYM', 'Database synonym', 'DB', 'sql/#SCHEMA#/050_synonyms', 
+    'DB/#SCHEMA#/synonyms', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (44, 'SEQUENCE', 'Database sequence', 'DB', 'sql/#SCHEMA#/020_sequences', 
+    'DB/#SCHEMA#/sequences', 'SCRIPT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (45, 'TYPE', 'Database type', 'DB', 'sql/#SCHEMA#/030_types', 
+    'DB/#SCHEMA#/types', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (46, 'TABLE', 'Database table', 'DB', 'sql/#SCHEMA#/040_tables', 
+    'DB/#SCHEMA#/tables', 'SCRIPT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (47, 'PROCEDURE', 'Database procedures', 'DB', 'sql/#SCHEMA#/070_procedures', 
+    'DB/#SCHEMA#/procedures', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (48, 'FUNCTION', 'Database function', 'DB', 'sql/#SCHEMA#/080_functions', 
+    'DB/#SCHEMA#/functions', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS, RECORD_AS_OBJECT_TYPE_ID)
+ Values
+   (50, 'INDEX', 'Database table index', 'DB', 'sql/#SCHEMA#/040_tables', 
+    'DB/#SCHEMA#/tables', 'SCRIPT', 46);
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (13, 'APP_ACL', 'APP_ACL', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (14, 'APP_COMPUTATION', 'APP_COMPUTATION', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (15, 'APP_SETTING', 'APP_SETTING', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (16, 'AUTHENTICATION', 'AUTHENTICATION', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (17, 'AUTHORIZATION', 'AUTHORIZATION', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (18, 'BREADCRUMB_ENTRY', 'BREADCRUMB_ENTRY', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (19, 'BREADCRUMB_TEMPLATE', 'BREADCRUMB_TEMPLATE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (20, 'BUILD_OPTION', 'BUILD_OPTION', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (21, 'BUTTON_TEMPLATE', 'BUTTON_TEMPLATE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (22, 'CALENDAR_TEMPLATE', 'CALENDAR_TEMPLATE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (23, 'CREDENTIAL', 'CREDENTIAL', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (24, 'DATA_LOADING', 'DATA_LOADING', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (25, 'DATA_PROFILE', 'DATA_PROFILE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (26, 'LABEL_TEMPLATE', 'LABEL_TEMPLATE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (27, 'LIST_TEMPLATE', 'LIST_TEMPLATE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (28, 'MESSAGE', 'MESSAGE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (29, 'NAVBAR', 'NAVBAR', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (30, 'PAGE_TEMPLATE', 'PAGE_TEMPLATE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (31, 'PARENT_TAB', 'PARENT_TAB', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (32, 'PLUGIN', 'PLUGIN', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (33, 'POPUP_LOV_TEMPLATE', 'POPUP_LOV_TEMPLATE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (34, 'REGION_TEMPLATE', 'REGION_TEMPLATE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (35, 'REMOTE_SERVER', 'REMOTE_SERVER', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (36, 'REPORT_QUERY', 'REPORT_QUERY', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (37, 'REPORT_TEMPLATE', 'REPORT_TEMPLATE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (38, 'SHORTCUT', 'SHORTCUT', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (39, 'TAB', 'TAB', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (40, 'TREE', 'TREE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (41, 'WEB_SERVICE', 'WEB_SERVICE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (42, 'WEB_SOURCE', 'WEB_SOURCE', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (49, 'PACKAGE BODY', 'Database package body', 'DB', 'sql/#SCHEMA#/100_package_bodies', 
+    'DB/#SCHEMA#/packages', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (1, 'PACKAGE', 'Database package', 'DB', 'sql/#SCHEMA#/090_packages', 
+    'DB/#SCHEMA#/packages', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (2, 'TRIGGER', 'Database trigger', 'DB', 'sql/#SCHEMA#/110_triggers', 
+    'DB/#SCHEMA#/triggers', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (3, 'VIEW', 'Database view', 'DB', 'sql/#SCHEMA#/060_views', 
+    'DB/#SCHEMA#/views', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (53, 'DIRECTORY', 'Database directory', 'DB', 'sql/#SCHEMA#/045_directories', 
+    'DB/#SCHEMA#/directories', 'SCRIPT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (54, 'TYPE BODY', 'Database type body', 'DB', 'sql/#SCHEMA#/035_type_bodies', 
+    'DB/#SCHEMA#/types', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (55, 'STATIC_APP_FILE', 'Static application file', 'APP', 'sql/#SCHEMA#/130_apex', 
+    '/app/apex/full', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (52, 'ORDS', 'ORDS RESTful Data Services', 'DB', 'sql/#SCHEMA#/140_ords', 
+    'ORDS/#SCHEMA#', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (56, 'CONTEXT', 'DB Context', 'DB', 'sql/#SCHEMA#/044_contexts', 
+    'DB/#SCHEMA#/contexts', 'OBJECT');
+Insert into OBJECT_TYPES
+   (OBJECT_TYPE_ID, CODE, NAME, OBJECT_LOCATION, TARGET_FOLDER, 
+    SOURCE_FOLDER, RECORD_AS)
+ Values
+   (57, 'SNAPSHOT', 'Database Snapshot', 'DB', 'sql/#SCHEMA#/060_views', 
+    'DB/#SCHEMA#/snapshots', 'OBJECT');
+
+
+Insert into PATCH_SCRIPT_TYPES
+   (PATCH_SCRIPT_TYPE_ID, CODE, NAME, TARGET_FOLDER, DEFAULT_YN, 
+    SEQ)
+ Values
+   (9, 'OTHER_DDL', 'Other DDL scripts (comment, analyze...)', 'sql/#SCHEMA#/115_other_ddl', 'N', 
+    6);
+Insert into PATCH_SCRIPT_TYPES
+   (PATCH_SCRIPT_TYPE_ID, CODE, NAME, TARGET_FOLDER, DEFAULT_YN, 
+    SEQ)
+ Values
+   (1, 'PRE', 'Pre-install', 'sql/#SCHEMA#/010_preinstall', 'Y', 
+    1);
+Insert into PATCH_SCRIPT_TYPES
+   (PATCH_SCRIPT_TYPE_ID, CODE, NAME, TARGET_FOLDER, DEFAULT_YN, 
+    SEQ)
+ Values
+   (2, 'POST', 'Post-install', 'sql/#SCHEMA#/200_postinstall', 'N', 
+    5);
+Insert into PATCH_SCRIPT_TYPES
+   (PATCH_SCRIPT_TYPE_ID, CODE, NAME, TARGET_FOLDER, DEFAULT_YN, 
+    SEQ)
+ Values
+   (3, 'DATA', 'Data', 'sql/#SCHEMA#/120_data', 'N', 
+    2);
+Insert into PATCH_SCRIPT_TYPES
+   (PATCH_SCRIPT_TYPE_ID, CODE, NAME, DEFAULT_YN, SEQ)
+ Values
+   (4, 'DDL', 'DDL scripts', 'N', 3);
+
+
 COMMIT;
