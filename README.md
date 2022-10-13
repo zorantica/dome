@@ -23,8 +23,12 @@ Main features:
 ## Changelog
 - 1.0 - Initial Release
 
+## Requirements
+- Oracle database 11g R2 or newer
+- Oracle APEX 22.1.4 or newer
+
 ## How to install DOME
-It is strongly recommended to install DOME into separate database schema and provide only necessary system grants.
+It is strongly recommended to install DOME into separate database schema and provide only necessary grants.
 
 ### Installation scripts
 Download scripts from "install" folder and install them in provided order.
@@ -45,18 +49,19 @@ Scripts:
 Script no. 00 is optional and it helps to create database user / schema.
 If You are going to use this script please enter correct user name, password and tablespaces for Your database.
 
-A user, in which is DOME installed, should have the following roles and grants assigned:
+A user, in which the DOME is installed, should have following roles and grants assigned:
 - APEX_ADMINISTRATOR_READ_ROLE role assigned
 - execute grant on dbms_crypto package
 - select grant on dba_objects view
 
-Script no. 06 is used to recompile a schema, in which DOME is installed. Please provide a correct schema name.
+Script no. 06 is used to recompile the schema, in which DOME is installed, at the end of installation. Please provide a correct schema name.
 
-Script no. 50 is APEX application script, which should be imported in appropriate workspace.
+Script no. 50 is APEX application script, which should be imported in appropriate workspace (using APEX GUI or from a client sich as SQLcl, SQLPlus, SQL Developer...).
 
+### First Login
 After all scripts are installed You should be able to login into DOME with username "admin" and password "admin".
 
-## How to use DOME
+## How to configure and use DOME
 Manual will be provided soon.
 
 ## Quick preview
