@@ -62,7 +62,8 @@ Script no. 50 is APEX application script, which should be imported in appropriat
 After all scripts are installed You should be able to login into DOME with username "admin" and password "admin".
 
 ## How to configure and use DOME
-Manual will be provided soon.
+Manuals are located in repository under folder "manuals".
+*(more manuals are in preparation)*
 
 ## Quick preview
 ![](https://github.com/zorantica/dome/blob/main/preview/preview01.jpg)
