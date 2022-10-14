@@ -403,5 +403,14 @@ Insert into PATCH_SCRIPT_TYPES
  Values
    (4, 'DDL', 'DDL scripts', 'N', 3);
 
+Insert into RELEASE_SCRIPT_TYPES
+   (RLS_SCRIPT_TYPE_ID, CODE, NAME, TARGET_FOLDER, SEQ)
+ Values
+   (1, 'PRE_RLS', 'Pre-release', 'sql/000_pre_rls/sql/#SCHEMA#', 1);
+Insert into RELEASE_SCRIPT_TYPES
+   (RLS_SCRIPT_TYPE_ID, CODE, NAME, TARGET_FOLDER, SEQ)
+ Values
+   (2, 'POST_RLS', 'Post-release', 'sql/999_post_rls/sql/#SCHEMA#', 2);
+
 
 COMMIT;

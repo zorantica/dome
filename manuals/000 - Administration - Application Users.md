@@ -1,7 +1,7 @@
 # Maintain Application Users
 
-## Access User Register
-Select main menu option Administration -> Users
+## Access Application Users Register
+Select menu option Administration -> Users
 ![000_files/acces_user_register.jpg](000_files/acces_user_register.jpg)
 There You'll have a list of all application users.
 

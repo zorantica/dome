@@ -20,7 +20,7 @@ Main features:
 - Hierarchical organization of patches (projects – task groups – tasks – patches)
 - Utilities such as: prepare installation scripts for binary files, source wrapping, export source (for GIT or other version control) 
 
-## Changelog
+## Change Log
 - 1.0 - Initial Release
 
 ## Requirements
@@ -56,7 +56,7 @@ A user, in which the DOME is installed, should have following roles and grants a
 
 Script no. 06 is used to recompile the schema, in which DOME is installed, at the end of installation. Please provide a correct schema name.
 
-Script no. 50 is APEX application script, which should be imported in appropriate workspace (using APEX GUI or from a client sich as SQLcl, SQLPlus, SQL Developer...).
+Script no. 50 is APEX application script, which should be imported in appropriate workspace (using APEX GUI or from a client such as SQLcl, SQLPlus, SQL Developer...).
 
 ### First Login
 After all scripts are installed You should be able to login into DOME with username "admin" and password "admin".
