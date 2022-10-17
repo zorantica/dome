@@ -1,10 +1,11 @@
 # Database Objects Register
+In this administration module a DOME user can set up and maintain Database Schemas and objects within database schemas, which should be later on included in patches.
 ## Maintain Database Schemas
-Select menu option Administration -> Database -> Database schemas
+To access: Select menu option Administration -> Database -> Database schemas
 ![010_files/database_schemas.png](010_files/database_schemas.png)
 You should simply add all database schemas, which should be covered by DOME (by monitoring or manual scripts generation).
 ## Maintain Database Objects
-Select menu option Administration -> Database -> Database objects
+To access: Select menu option Administration -> Database -> Database objects
 ![010_files/database_objects.png](010_files/database_objects.png)
 Following data can be maintained:
 - database schema - a schema in which is object located
@@ -24,7 +25,7 @@ New objects are added and missing (dropped) are marked as inactive.
 For every object there is a clock icon within "Included in patch" column.
 With click on this icon a modal page with insight in object's history is displayed:
 ![010_files/object_history.png](010_files/object_history.png)
-There a user may see:
+On this page a user will have insight in following data:
 - in which patches an object was included and in which version (task code, task name and patch number)
 - in which releases an object was included
 - what was changed (user comments)

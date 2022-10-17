@@ -1,6 +1,7 @@
 # Maintain Object Types
-## Access Object Types Register
-Select menu option Administration -> Object Types
+In this administration module a DOME user can set up and maintain database object types and APEX (components) object types from topmost level (APEX workspace or database schema) till lowest level (for example table index, APEX page or breadcrumb entry).
+
+To access: Select menu option Administration -> Object Types
 All object types (both database and APEX) can be maintained from the same page.
 ![005_files/main_page.png](005_files/main_page.png)
 In interactive grid with object list following data can be maintained:
