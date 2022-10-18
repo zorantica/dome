@@ -1,6 +1,7 @@
 # Maintain Release Script Types
-## Access Release Script Types Register
-Select menu option Administration -> Release Script Types
+In this administration module a DOME user can set up and maintain release script types.
+Defined script types are used for scripts included on release level. 
+
+To access: select menu option Administration -> Release Script Types
 ![008_files/release_script_types.png](008_files/release_script_types.png)
-Defines script types for scripts included on release level. 
-You may define code, name and target folder.
+A code, name and target folder can be defined.
