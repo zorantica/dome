@@ -1,5 +1,5 @@
 # D.O.M.E. (Deployment Organization Made Easy)
-DOME for Oracle database and Oracle APEX is a tool which helps developer teams to organize and speed-up deployment scripts production processes.
+DOME for Oracle database and Oracle APEX is a tool which helps developer teams to organize and speed-up deployment (installation) scripts production processes.
 
 Main features:
 - Swift and automatic patch scripts generation
