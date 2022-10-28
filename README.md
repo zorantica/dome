@@ -47,6 +47,7 @@ Scripts:
 
 ### Installation Remarks
 Script no. 00 is optional and it helps to create database user / schema.
+
 If You are going to use this script please enter correct user name, password and tablespaces for Your database.
 
 A user, in which the DOME is installed, should have following roles and grants assigned:
