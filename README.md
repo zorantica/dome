@@ -63,7 +63,6 @@ After all scripts are installed You should be able to login into DOME with usern
 
 ## How to configure and use DOME
 Manuals are located in repository under folder "manuals".
-*(more manuals are in preparation)*
 
 ## Quick preview
 ![](https://github.com/zorantica/dome/blob/main/preview/preview01.jpg)
