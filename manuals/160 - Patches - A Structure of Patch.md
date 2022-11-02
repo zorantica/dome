@@ -44,8 +44,8 @@ On this tab all applications or application components, which are included in pa
 
 ![160_files/app_components.png](160_files/app_components.png)
 
-Applications and components can be added to patch manually.
-On this tab it is also possible to refresh application components register by clicking on Refresh register button (see TODO). 
+Applications and components should be added to patch manually.
+On this tab it is also possible to refresh application components register by clicking on Refresh register button (see TODO).
 
 ## Linked patches
 Accessible in lower part of the page, "Linked Patches" tab.
