@@ -28,7 +28,7 @@ prompt APPLICATION 150 - DOME
 -- Application Export:
 --   Application:     150
 --   Name:            DOME
---   Date and Time:   11:36 Wednesday November 2, 2022
+--   Date and Time:   13:01 Wednesday November 2, 2022
 --   Exported By:     ZORAN
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -101,7 +101,7 @@ wwv_flow_imp.create_flow(
 ,p_flow_image_prefix => nvl(wwv_flow_application_install.get_image_prefix,'')
 ,p_documentation_banner=>'Application created from create application wizard 2020.07.27.'
 ,p_authentication=>'PLUGIN'
-,p_authentication_id=>wwv_flow_imp.id(30176252150454889)
+,p_authentication_id=>wwv_flow_imp.id(312825432570842970)
 ,p_application_tab_set=>1
 ,p_logo_type=>'T'
 ,p_logo_text=>'Deployment Organization Made Easy'
@@ -125,7 +125,7 @@ wwv_flow_imp.create_flow(
 ,p_substitution_string_01=>'APP_NAME'
 ,p_substitution_value_01=>'DOME'
 ,p_last_updated_by=>'ZORAN'
-,p_last_upd_yyyymmddhh24miss=>'20221102113306'
+,p_last_upd_yyyymmddhh24miss=>'20221102125956'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_files_version=>4
 ,p_ui_type_name => null
@@ -27135,7 +27135,7 @@ wwv_flow_imp_page.create_page(
 ,p_protection_level=>'C'
 ,p_page_component_map=>'02'
 ,p_last_updated_by=>'ZORAN'
-,p_last_upd_yyyymmddhh24miss=>'20221102110706'
+,p_last_upd_yyyymmddhh24miss=>'20221102123917'
 );
 wwv_flow_imp_page.create_page_plug(
  p_id=>wwv_flow_imp.id(7959236008028916)
@@ -31105,8 +31105,8 @@ wwv_flow_imp_page.create_page_da_event(
  p_id=>wwv_flow_imp.id(9843915103611915)
 ,p_name=>'Refresh components region after components are selected'
 ,p_event_sequence=>160
-,p_triggering_element_type=>'BUTTON'
-,p_triggering_button_id=>wwv_flow_imp.id(83560032161159950)
+,p_triggering_element_type=>'REGION'
+,p_triggering_region_id=>wwv_flow_imp.id(17082658206084246)
 ,p_bind_type=>'bind'
 ,p_bind_event_type=>'apexafterclosedialog'
 );
