@@ -37,7 +37,7 @@ Insert into PROJECT_SETTINGS
 Insert into PATCH_TEMPLATES
    (PATCH_TEMPLATE_ID, CODE, NAME, PROCEDURE_NAME, SQL_SUBFOLDER)
  Values
-   (1, 'SINGLE', 'Single installation script', 'pkg_patch_templates.p_single_template_files', null);
+   (1, 'SQLPLUS', 'SQL Plus install scripts', 'pkg_patch_templates.p_sqlplus_files', null);
 
 
 Insert into OBJECT_TYPES

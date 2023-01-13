@@ -1,4 +1,5 @@
-# D.O.M.E. (Deployment Organization Made Easy)
+# D.O.M.E. for Oracle 5.0 *(Deployment Organization Made Easy)*
+
 DOME for Oracle database and Oracle APEX is a tool which helps developer teams to organize and speed-up deployment (installation) scripts production processes.
 
 Main features:
@@ -21,11 +22,18 @@ Main features:
 - Utilities such as: prepare installation scripts for binary files, source wrapping, export source (for GIT or other version control) 
 
 ## Change Log
-- 1.0 - Initial Release
+- 5.0.0 - List of application objects changed by current user (helper to add application objects to patch)
+- 4.9.1 - Patch warnings (empty patch...) displayed on patch list
+- 4.9.0 - Hidden task group (useful for testing or instructions)
+- 4.8.2 - Re-sequence patch scripts
+- 4.8.1 - Start / stop button on patch details page
+
+*Complete Change Log can be found in document [changelog.md](changelog.md).*
+
 
 ## Requirements
 - Oracle database 11g R2 or newer
-- Oracle APEX 22.1.4 or newer
+- Oracle APEX 19.2 or newer
 
 ## How to install DOME
 It is strongly recommended to install DOME into separate database schema and provide only necessary grants.
@@ -50,7 +58,7 @@ Script no. 00 is optional and it helps to create database user / schema.
 
 If You are going to use this script please enter correct user name, password and tablespaces for Your database.
 
-A user, in which the DOME is installed, should have following roles and grants assigned:
+A user / schema, in which the DOME is installed, should have following roles and grants assigned:
 - APEX_ADMINISTRATOR_READ_ROLE role assigned
 - execute grant on dbms_crypto package
 - select grant on dba_objects view

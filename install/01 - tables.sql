@@ -898,7 +898,7 @@ CREATE TABLE PATCH_TEMPLATES
   PATCH_TEMPLATE_ID  NUMBER(10)                 NOT NULL,
   CODE               VARCHAR2(20 CHAR)          NOT NULL,
   NAME               VARCHAR2(500 CHAR)         NOT NULL,
-  PROCEDURE_NAME     VARCHAR2(128 CHAR),
+  PROCEDURE_NAME     VARCHAR2(128 CHAR)         NOT NULL,
   SQL_SUBFOLDER      VARCHAR2(500 CHAR)
 )
 LOGGING 
@@ -915,10 +915,10 @@ COMMENT ON COLUMN PATCH_TEMPLATES.CODE IS 'Template code'
 COMMENT ON COLUMN PATCH_TEMPLATES.NAME IS 'Template name'
 /
 
-COMMENT ON COLUMN PATCH_TEMPLATES.PROCEDURE_NAME IS 'Name of procedure which will be executed to fill placeholders in patch template files when patch is downloaded'
+COMMENT ON COLUMN PATCH_TEMPLATES.PROCEDURE_NAME IS 'A procedure, which will be executed to prepare patch files (object scripts plus files from template)'
 /
 
-COMMENT ON COLUMN PATCH_TEMPLATES.SQL_SUBFOLDER IS 'Subfolder in which patch folders are stored.'
+COMMENT ON COLUMN PATCH_TEMPLATES.SQL_SUBFOLDER IS 'A subfolder, in which patch sub-folders (based on object types and script types) are created.'
 /
 
 
@@ -968,12 +968,12 @@ COMMENT ON COLUMN PATCH_TEMPLATE_FILES.FILE_CONTENT IS 'File content'
 COMMENT ON COLUMN PATCH_TEMPLATE_FILES.USER_COMMENT IS 'User comment'
 /
 
-COMMENT ON COLUMN PATCH_TEMPLATE_FILES.USAGE_TYPE IS 'Usage type (A always used, SL schema level, M manually generated, N never used, U utility script)'
+COMMENT ON COLUMN PATCH_TEMPLATE_FILES.USAGE_TYPE IS 'Usage type (A always used, SL schema level, M manually generated, N never used, B binary file)'
 /
 
 
 ALTER TABLE PATCH_TEMPLATE_FILES ADD (
-  CHECK ( usage_type IN ( 'A', 'M', 'N', 'SL', 'U' ) )
+  CHECK ( usage_type IN ( 'A', 'M', 'N', 'SL', 'B' ) )
   ENABLE VALIDATE)
 /
 
@@ -2637,3 +2637,45 @@ ALTER TABLE WRAP_OBJECT_TYPES ADD (
   ON DELETE CASCADE
   ENABLE VALIDATE)
 /
+
+
+ALTER TABLE task_groups ADD (
+    external_ticket_key VARCHAR2(4000 CHAR)
+);
+
+COMMENT ON COLUMN task_groups.external_ticket_key IS
+    'A ticket key from external system (like Jira Epic ticket)';
+
+
+ALTER TABLE tasks ADD (
+    external_ticket_key VARCHAR2(4000 CHAR)
+);
+
+COMMENT ON COLUMN tasks.external_ticket_key IS
+    'A ticket key from external system (like Jira Epic ticket)';
+
+ALTER TABLE projects ADD (
+    external_url VARCHAR2(4000 CHAR)
+);
+
+COMMENT ON COLUMN projects.external_url IS
+    'URL for extrenal system API (for example Jira)';
+ALTER TABLE projects ADD (
+    external_project_code VARCHAR2(20 CHAR)
+);
+
+COMMENT ON COLUMN projects.external_project_code IS
+    'External project code (for example Jira)';
+	
+ALTER TABLE projects ADD (
+    external_username VARCHAR2(500 CHAR)
+);
+
+COMMENT ON COLUMN projects.external_username IS
+    'External system login username';
+ALTER TABLE projects ADD (
+    external_password VARCHAR2(500 CHAR)
+);
+
+COMMENT ON COLUMN projects.external_password IS
+    'External system login username';

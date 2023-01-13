@@ -482,3 +482,20 @@ FROM
     JOIN objects ws ON wu.workspace_id = ws.object_id
     JOIN app_users au on wu.app_user_id = au.app_user_id
 /
+
+
+
+CREATE OR REPLACE FORCE VIEW v_tasks AS
+SELECT
+    t.task_id,
+    tg.task_group_id,
+    p.project_id,
+    t.code as task_code,
+    t.name as task_name,
+    t.external_ticket_key
+FROM 
+    tasks t
+    JOIN task_groups tg ON t.task_group_id = tg.task_group_id
+    JOIN projects p ON tg.project_id = p.project_id
+
+
