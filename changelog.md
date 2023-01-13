@@ -1,5 +1,6 @@
 # Change Log
 
+- 5.1.0 - Export patch and release scripts for SQL Plus 
 - 5.0.0 - List of application objects changed by current user (helper to add application objects to patch)
 - 4.9.1 - Patch warnings (empty patch...) displayed on patch list
 - 4.9.0 - Hidden task group (useful for testing or instructions)
