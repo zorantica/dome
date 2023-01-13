@@ -1,4 +1,4 @@
-# D.O.M.E. for Oracle 5.0 *(Deployment Organization Made Easy)*
+# D.O.M.E. for Oracle 5.1 *(Deployment Organization Made Easy)*
 
 DOME for Oracle database and Oracle APEX is a tool which helps developer teams to organize and speed-up deployment (installation) scripts production processes.
 
