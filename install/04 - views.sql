@@ -189,7 +189,12 @@ SELECT
     ta.external_link,
     usr_ow.display_name as user_owner,
     pa.for_production_comment,
-    tg.hidden_yn as task_group_hidden_yn
+    tg.hidden_yn as task_group_hidden_yn,
+    regexp_replace(
+        replace( substr(ta.code || '_' || pa.patch_number || ' - ' || ta.name, 1, 100), '"', null),
+        '[/\:*?<>]',
+        '_'
+    ) as filename_without_extension
 FROM
     patches pa
     JOIN tasks ta ON pa.task_id = ta.task_id
@@ -404,7 +409,7 @@ FROM
     JOIN projects pr ON rls.project_id = pr.project_id
     JOIN app_users au ON rls.created_app_user_id = au.app_user_id
     JOIN project_settings ps ON rls.project_id = ps.project_id
-        JOIN r_settings s ON ps.setting_id = s.setting_id AND s.code = 'PATCH_TEMPLATE_CODE'
+        JOIN r_settings s ON ps.setting_id = s.setting_id AND s.code = 'RLS_TEMPLATE_CODE'
     LEFT JOIN patch_templates pt ON ps.value_vc2 = pt.code
     LEFT JOIN
     (
@@ -447,6 +452,26 @@ FROM
 
 
 --
+-- V_TASKS  (View) 
+--
+CREATE OR REPLACE FORCE VIEW V_TASKS
+BEQUEATH DEFINER
+AS 
+SELECT
+    t.task_id,
+    tg.task_group_id,
+    p.project_id,
+    t.code as task_code,
+    t.name as task_name,
+    t.external_ticket_key
+FROM 
+    tasks t
+    JOIN task_groups tg ON t.task_group_id = tg.task_group_id
+    JOIN projects p ON tg.project_id = p.project_id
+/
+
+
+--
 -- V_WORKSPACES  (View) 
 --
 CREATE OR REPLACE FORCE VIEW V_WORKSPACES
@@ -482,20 +507,3 @@ FROM
     JOIN objects ws ON wu.workspace_id = ws.object_id
     JOIN app_users au on wu.app_user_id = au.app_user_id
 /
-
-
-
-CREATE OR REPLACE FORCE VIEW v_tasks AS
-SELECT
-    t.task_id,
-    tg.task_group_id,
-    p.project_id,
-    t.code as task_code,
-    t.name as task_name,
-    t.external_ticket_key
-FROM 
-    tasks t
-    JOIN task_groups tg ON t.task_group_id = tg.task_group_id
-    JOIN projects p ON tg.project_id = p.project_id
-
-

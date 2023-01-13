@@ -18,6 +18,11 @@ Insert into R_SETTINGS
    (SETTING_ID, CODE, NAME, HIDDEN_YN)
  Values
    (2, 'PATCH_TEMPLATE_CODE', 'Patch template code', 'N');
+Insert into R_SETTINGS
+   (SETTING_ID, CODE, NAME, HIDDEN_YN)
+ Values
+   (7, 'RLS_TEMPLATE_CODE', 'Patch template code for Release', 'N');
+
 
 
 Insert into PROJECT_SETTINGS
@@ -31,13 +36,47 @@ Insert into PROJECT_SETTINGS
 Insert into PROJECT_SETTINGS
    (PROJECT_SETTING_ID, PROJECT_ID, SETTING_ID, VALUE_VC2)
  Values
-   (2, 1, 2, 'SINGLE');
+   (2, 1, 2, 'SQLPLUS');
+SET DEFINE OFF;
+Insert into PROJECT_SETTINGS
+   (PROJECT_SETTING_ID, PROJECT_ID, SETTING_ID, VALUE_VC2)
+ Values
+   (7, 1, 7, 'SQLPLUS_RLS');
 
 
 Insert into PATCH_TEMPLATES
    (PATCH_TEMPLATE_ID, CODE, NAME, PROCEDURE_NAME, SQL_SUBFOLDER)
  Values
-   (1, 'SQLPLUS', 'SQL Plus install scripts', 'pkg_patch_templates.p_sqlplus_files', null);
+   (2, 'SQLPLUS_RLS', 'SQL Plus install scripts for Release', 'pkg_scripts.p_sqlplus_release_p', 'Patches');
+Insert into PATCH_TEMPLATES
+   (PATCH_TEMPLATE_ID, CODE, NAME, PROCEDURE_NAME, SQL_SUBFOLDER)
+ Values
+   (1, 'SQLPLUS', 'SQL Plus install scripts', 'pkg_scripts.p_sqlplus_multiple_files_p', 'sql');
+
+Insert into PATCH_TEMPLATE_FILES
+   (PATCH_TEMPLATE_FILE_ID, FILE_NAME, PATCH_TEMPLATE_ID, FILE_CONTENT, USAGE_TYPE)
+ Values
+   (57, 'documentation/instructions.txt', 1, pkg_utils.f_clob_to_blob('- Use SQLPlus.exe to execute install.sql file'||CHR(13)||CHR(10)||'- Provide necessary information (connection strings, environment data...)'||CHR(13)||CHR(10)||'- Install logs will be stored in /LOGS folder'), 'A');
+Insert into PATCH_TEMPLATE_FILES
+   (PATCH_TEMPLATE_FILE_ID, FILE_NAME, PATCH_TEMPLATE_ID, FILE_CONTENT, USAGE_TYPE)
+ Values
+   (58, 'documentation/release_notes.txt', 1, pkg_utils.f_clob_to_blob('Release notes:'||CHR(13)||CHR(10)||'__RELEASE_NOTES__'), 'A');
+Insert into PATCH_TEMPLATE_FILES
+   (PATCH_TEMPLATE_FILE_ID, FILE_NAME, PATCH_TEMPLATE_ID, FILE_CONTENT, USAGE_TYPE)
+ Values
+   (59, 'documentation/content.txt', 1, pkg_utils.f_clob_to_blob('Application: __APP_NAME__'||CHR(13)||CHR(10)||'Patch Code: __CODE__'||CHR(13)||CHR(10)||'Patch Name: __NAME__'||CHR(13)||CHR(10)||'Author: __AUTHOR__'||CHR(13)||CHR(10)||'Version: __VERSION__'||CHR(13)||CHR(10)||'Comment: __COMMENT__'), 'A');
+Insert into PATCH_TEMPLATE_FILES
+   (PATCH_TEMPLATE_FILE_ID, FILE_NAME, PATCH_TEMPLATE_ID, FILE_CONTENT, USAGE_TYPE)
+ Values
+   (62, 'log/log.txt', 1, pkg_utils.f_clob_to_blob('will be filled after first install'), 'A');
+Insert into PATCH_TEMPLATE_FILES
+   (PATCH_TEMPLATE_FILE_ID, FILE_NAME, PATCH_TEMPLATE_ID, FILE_CONTENT, USAGE_TYPE)
+ Values
+   (61, 'install.bat', 1, pkg_utils.f_clob_to_blob('sqlplus @install.sql /nolog'), 'A');
+Insert into PATCH_TEMPLATE_FILES
+   (PATCH_TEMPLATE_FILE_ID, FILE_NAME, PATCH_TEMPLATE_ID, FILE_CONTENT, USAGE_TYPE)
+ Values
+   (64, 'install.bat', 2, pkg_utils.f_clob_to_blob('sqlplus @install.sql /nolog'), 'A');
 
 
 Insert into OBJECT_TYPES
@@ -406,11 +445,11 @@ Insert into PATCH_SCRIPT_TYPES
 Insert into RELEASE_SCRIPT_TYPES
    (RLS_SCRIPT_TYPE_ID, CODE, NAME, TARGET_FOLDER, SEQ)
  Values
-   (1, 'PRE_RLS', 'Pre-release', 'sql/000_pre_rls/sql/#SCHEMA#', 1);
+   (1, 'PRE_RLS', 'Pre-release', 'pre_rls/#SCHEMA#', 1);
 Insert into RELEASE_SCRIPT_TYPES
    (RLS_SCRIPT_TYPE_ID, CODE, NAME, TARGET_FOLDER, SEQ)
  Values
-   (2, 'POST_RLS', 'Post-release', 'sql/999_post_rls/sql/#SCHEMA#', 2);
+   (2, 'POST_RLS', 'Post-release', 'post_rls/#SCHEMA#', 2);
 
 
 COMMIT;

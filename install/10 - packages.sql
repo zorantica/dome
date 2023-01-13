@@ -68,16 +68,6 @@ FUNCTION encrypt_password(p_password in varchar2) RETURN raw;
 
 FUNCTION decrypt_password(p_username in varchar2) RETURN varchar2;
 
-/*
-FUNCTION f_pravice_dostopa(
-    pnUserID uporabniki.id%TYPE,
-    pcModul moduli.sifra%TYPE) RETURN boolean;
-
-FUNCTION f_pravice_dostopa_baza(
-    pcUser uporabniki.username%TYPE,
-    pcBaza baze.dblink%TYPE) RETURN boolean;
-    */
-
 PROCEDURE p_change_pwd(
     p_username varchar2,
     p_new_password varchar2);
@@ -129,6 +119,48 @@ CREATE OR REPLACE PACKAGE pkg_declarations IS
 SUBTYPE yes_no IS varchar2(1);
 
 END pkg_declarations;
+/
+
+
+--
+-- PKG_DOME_UTILS  (Package) 
+--
+CREATE OR REPLACE PACKAGE PKG_DOME_UTILS AS 
+
+
+--object scripts
+FUNCTION f_get_database_object_script(
+    p_name varchar2,
+    p_type varchar2,
+    p_grants_yn varchar2 default 'N'
+) RETURN clob;
+
+
+FUNCTION f_get_app_component_script(
+    p_app_no number,
+    p_id number,
+    p_type varchar2
+) RETURN clob;
+
+
+FUNCTION f_get_app_script(
+    p_app_no number
+) RETURN clob;
+
+
+--object lists
+FUNCTION f_get_objects_list(
+    p_object_type varchar2  --values: ORDS
+) RETURN PKG_DOME_INTERFACE.t_objects;
+
+--lock page
+FUNCTION f_page_locked_yn(
+    p_app_number number,
+    p_page_number number
+) RETURN varchar2;
+
+
+END PKG_DOME_UTILS;
 /
 
 
@@ -292,13 +324,6 @@ PROCEDURE p_refresh_app_comp(
     p_app_ids varchar2  --application IDs (input is checkbox and string is : separated)
 );
 
-FUNCTION f_merge_app_component (
-    p_comp_id number,
-    p_app_id number,
-    p_type_code varchar2,
-    p_comp_name varchar2
-) RETURN objects.object_id%TYPE;
-
 
 
 --create object
@@ -440,27 +465,63 @@ CURSOR c_patch(p_patch_id patches.patch_id%TYPE) IS
         pkg_patch_templates.f_get_procedure_name(patch_template_id) as patch_procedure_name
     FROM 
         v_patches v_p
-    WHERE v_p.patch_id = p_patch_id;
+    WHERE v_p.patch_id = p_patch_id
+;
+
+
+CURSOR c_patch_schemas (
+    p_patch_id patches.patch_id%TYPE
+) IS 
+    SELECT DISTINCT 
+        v_pso.schema_name as schema_name
+    FROM v_patch_scr_and_obj v_pso
+    WHERE 
+        v_pso.patch_id = p_patch_id
+    AND v_pso.object_as_patch_script_yn = 'N'
+;
+
+TYPE t_patch_schemas IS TABLE OF c_patch_schemas%ROWTYPE;
+
+
+
+CURSOR c_patch_files (
+    p_patch_id patches.patch_id%TYPE
+) IS 
+    SELECT
+        v_pso.filename_replaced as filename,
+        pkg_utils.f_clob_to_blob(v_pso.sql_content) as blob_file,
+        v_pso.schema_name,
+        CASE 
+            WHEN v_pso.schema_name <> lag(v_pso.schema_name, 1, 'not existing one') over (order by v_pso.schema_name, v_pso.seq_nr, v_pso.filename) THEN 'Y' 
+            ELSE 'N' 
+        END as change_schema_yn
+    FROM v_patch_scr_and_obj v_pso
+    WHERE 
+        v_pso.patch_id = p_patch_id
+    AND v_pso.object_as_patch_script_yn = 'N'
+    ORDER BY
+        v_pso.schema_name,
+        v_pso.seq_nr,
+        v_pso.filename
+;
+
+TYPE t_patch_files IS TABLE OF c_patch_files%ROWTYPE;
+
 
 
 
 --getters
-FUNCTION f_get_v_patch(
-    p_patch_id patches.patch_id%TYPE
-) RETURN v_patches%ROWTYPE;
-
 FUNCTION f_get_project_id(
     p_patch_id patches.patch_id%TYPE
 ) RETURN v_patches.project_id%TYPE;
 
 
-
---confirm and unlock patch
 PROCEDURE p_confirm_patch(
     p_patch_id patches.patch_id%TYPE,
     p_user_confirmed_id patches.confirmed_app_user_id%TYPE
 );
 
+--unlock patch
 FUNCTION f_unlock_patch_possible(
     p_patch_id patches.patch_id%TYPE
 ) RETURN varchar2;
@@ -506,6 +567,13 @@ FUNCTION f_patch_warnings (
     p_patch_id patches.patch_id%TYPE
 ) RETURN varchar2;
 
+
+--move tasks to another task group
+PROCEDURE p_move_tasks (
+    p_new_group_id task_groups.task_group_id%TYPE 
+);
+
+
 END PKG_PATCHES;
 /
 
@@ -514,11 +582,6 @@ END PKG_PATCHES;
 -- PKG_PATCH_OBJECTS  (Package) 
 --
 CREATE OR REPLACE PACKAGE PKG_PATCH_OBJECTS AS 
-
-
-gcCompListCollName varchar2(30) := 'COLL_P470_COMP_LIST';
-
-
 
 FUNCTION f_next_version(
     p_object_id objects.object_id%TYPE
@@ -542,19 +605,6 @@ FUNCTION f_object_in_another_patch_err(
     p_current_patch_id patches.patch_id%TYPE
 ) RETURN varchar2;
 
-
---function is used on page 470 - it prepares app components list and stores it in APEX collection
-PROCEDURE p_prepare_component_list (
-    p_patch_id patches.patch_id%TYPE,
-    p_current_user_id app_users.app_user_id%TYPE
-);
-
-FUNCTION f_comp_list_coll_name RETURN varchar2;
-
-PROCEDURE p_add_app_comp_to_patch (
-    p_patch_id patches.patch_id%TYPE,
-    p_current_user_id app_users.app_user_id%TYPE
-);
 
 END PKG_PATCH_OBJECTS;
 /
@@ -614,7 +664,48 @@ END PKG_PATCH_SCRIPTS;
 --
 CREATE OR REPLACE PACKAGE pkg_patch_templates AS
 
-CURSOR c_files(p_patch_template_id patch_templates.patch_template_id%TYPE) IS
+
+CURSOR c_template_data (
+    p_id number,
+    p_patch_or_release varchar2
+)
+    IS
+    SELECT 
+        patch_template_id,
+        project_name,
+        task_code as code,
+        task_code_and_name as name,
+        user_created,
+        'P_' || patch_id as id,
+        '1.' || patch_number as version,
+        user_comments,
+        release_notes,
+        filename_without_extension || '.zip' as filename,
+        filename_without_extension || '/' as root_folder
+    FROM v_patches
+    WHERE 
+        patch_id = p_id
+    AND p_patch_or_release = 'P'
+  UNION ALL 
+    SELECT 
+        patch_template_id,
+        project as project_name,
+        code as code,
+        display as name,
+        user_created_display_name as user_created,
+        'R_' || release_id as id,
+        '1.0' as version,
+        null as user_comments,
+        null as release_notes,
+        code || '.zip' as filename,
+        code || '/' as root_folder
+    FROM v_releases
+    WHERE 
+        release_id = p_id
+    AND p_patch_or_release = 'R'
+;
+
+CURSOR c_patch_template_files(p_patch_template_id patch_templates.patch_template_id%TYPE) IS
     SELECT
         file_name,
         file_content,
@@ -625,7 +716,11 @@ CURSOR c_files(p_patch_template_id patch_templates.patch_template_id%TYPE) IS
     AND usage_type <> 'N'  --N never used
 ;
 
-TYPE t_files IS TABLE OF c_files%ROWTYPE;
+TYPE t_patch_template_files IS TABLE OF c_patch_template_files%ROWTYPE;
+
+
+
+
 
 --getters
 FUNCTION f_get_procedure_name(
@@ -641,14 +736,6 @@ FUNCTION f_get_sql_subfolder(
 PROCEDURE p_parse_zip(
     p_patch_template_id patch_templates.patch_template_id%TYPE,
     p_file_name varchar2
-);
-
-
---procedure for generating OPAL tools template files for patch or release
-PROCEDURE p_opal_template_files(
-    p_id patches.patch_id%TYPE,
-    p_patch_or_release varchar2,  --values PATCH or RELEASE
-    p_files OUT t_files
 );
 
 
@@ -681,7 +768,7 @@ CREATE OR REPLACE PACKAGE PKG_RELEASES AS
 
 
 TYPE t_file IS RECORD (
-    filename varchar2(1000),
+    filename varchar2(4000),
     file_content blob
 );
 
@@ -710,6 +797,11 @@ FUNCTION f_script_target_filename(
 ) RETURN varchar2;
 
 
+
+FUNCTION f_prepare_patch_files(
+    p_patch_id patches.patch_id%TYPE,
+    p_main_folder_name_prefix varchar2 default null 
+) RETURN pkg_releases.t_files;
 
 PROCEDURE p_prepare_patch_zip(
     p_patch_id patches.patch_id%TYPE,
@@ -743,6 +835,34 @@ FUNCTION f_release_patches(
 ) RETURN varchar2;
 
 END PKG_RELEASES;
+/
+
+
+--
+-- PKG_SCRIPTS  (Package) 
+--
+CREATE OR REPLACE PACKAGE pkg_scripts as
+
+/*
+This package is used to store procedures, which define scripts output for patches and releases.
+Main procedure name for scripts output should be set in patch templates.
+*/
+
+PROCEDURE p_sqlplus_multiple_files_p (
+    p_id number,  --patch or release ID
+    p_patch_or_release varchar2,  --values PATCH or RELEASE
+    p_files OUT pkg_releases.t_files
+);
+
+
+
+PROCEDURE p_sqlplus_release_p (
+    p_id number,  --patch or release ID
+    p_patch_or_release varchar2,  --values P or R
+    p_files OUT pkg_releases.t_files
+);
+
+END pkg_scripts;
 /
 
 
@@ -1252,6 +1372,371 @@ BEGIN
 END p_check_dependencies;
 
 END pkg_check;
+/
+
+
+--
+-- PKG_DOME_UTILS  (Package Body) 
+--
+CREATE OR REPLACE PACKAGE BODY PKG_DOME_UTILS AS
+
+FUNCTION f_db_object_exists_yn(
+    p_name varchar2,
+    p_type varchar2
+) RETURN varchar2 IS
+
+    lcObjectExists varchar2(1);
+
+BEGIN
+    if p_type in ('DIRECTORY') then
+        SELECT 'Y'
+        INTO lcObjectExists
+        FROM all_objects
+        WHERE
+            object_type = p_type
+        AND object_name = p_name
+        ;
+    
+    else
+        SELECT 'Y'
+        INTO lcObjectExists
+        FROM user_objects
+        WHERE
+            object_type = p_type
+        AND object_name = p_name
+        ;
+    
+    end if;
+
+    RETURN lcObjectExists;
+    
+EXCEPTION WHEN no_data_found THEN 
+    RETURN 'N';
+    
+END f_db_object_exists_yn;
+
+
+
+
+FUNCTION f_get_database_object_script(
+    p_name varchar2,
+    p_type varchar2,
+    p_grants_yn varchar2 default 'N'
+) RETURN clob AS
+
+    lcScript clob;
+
+    CURSOR c_grants IS
+        SELECT 
+            'GRANT ' || privilege || ' TO ' || grantee || ' ON ' || table_name || chr(10) || '/' || chr(10) as grant_script
+        FROM user_tab_privs
+        WHERE 
+            type = p_type
+        AND table_name = p_name
+        AND owner = SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA')
+        ;
+
+BEGIN
+    if p_type = 'ORDS' then
+        lcScript := ords_export.export_module(
+            p_module_name => p_name
+        );
+
+    elsif p_type = 'DIRECTORY' then
+        --TODO: fix script for directories
+        RETURN null;
+        
+    else
+        --if object doesn't exist (dropped or some other reason) just return empty script
+        if f_db_object_exists_yn(p_name => p_name, p_type => p_type) = 'N' then
+            RETURN null;
+        end if;
+
+        --used mostly for triggers to separate trigger ENABLE statement from trigger definition
+        DBMS_METADATA.set_transform_param(DBMS_METADATA.session_transform, 'SQLTERMINATOR', true);
+        
+        --main object script
+        lcScript := dbms_metadata.get_ddl(
+            object_type => 
+                CASE p_type 
+                    WHEN 'PACKAGE' THEN 'PACKAGE_SPEC'
+                    WHEN 'PACKAGE BODY' THEN 'PACKAGE_BODY'
+                    ELSE p_type
+                END, 
+            name => p_name
+        );
+        
+        if p_grants_yn = 'Y' and p_type in ('PACKAGE', 'VIEW', 'TABLE') then
+            lcScript := lcScript || chr(10) || chr(10);
+        
+            FOR t IN c_grants LOOP
+                lcScript := lcScript || t.grant_script;
+            END LOOP;
+        end if;
+        
+    end if;
+    
+    RETURN lcScript;
+    
+END f_get_database_object_script;
+
+
+
+FUNCTION f_get_app_component_script(
+    p_app_no number,
+    p_id number,
+    p_type varchar2
+) RETURN clob AS
+
+    lrFiles apex_t_export_files;
+    lcFileName apex_application_static_files.file_name%TYPE;
+
+BEGIN
+    --get files
+    if p_type <> 'STATIC_APP_FILE' then  --classic components
+    
+        lrFiles := apex_export.get_application(
+            p_application_id => p_app_no,
+            p_split => false,
+            --p_with_ir_public_reports => true,
+            p_with_translations => true,
+            p_with_comments => true,
+            p_components => apex_t_varchar2( p_type || ':' || p_id )
+        );
+
+        RETURN lrFiles(lrFiles.first).contents;
+        
+    else  --static application files
+
+        --get splitted application scripts
+        lrFiles := apex_export.get_application(
+            p_application_id => p_app_no,
+            p_split => true,
+            p_with_translations => true,
+            p_with_comments => true
+        );
+
+        --get file name
+        SELECT 
+            lower(
+                replace( replace(file_name, '/', '_'), '.', '_') 
+            )
+        INTO lcFileName
+        FROM apex_application_static_files
+        WHERE application_file_id = p_id
+        ;
+
+        --loop through static app files and pick script for selected static application file
+        FOR t IN 1 .. lrFiles.count LOOP
+
+            if instr(lrFiles(t).name, lcFileName || '.sql') > 0 then
+                RETURN 
+                    lrFiles(t).contents ||  
+                    chr(10) ||
+                    'BEGIN' || chr(10) || 
+                    '    COMMIT;' || chr(10) || 
+                    'END;' || chr(10) || 
+                    '/';
+            end if;
+             
+        END LOOP;
+        
+        RAISE_APPLICATION_ERROR( -20001, 'Script for static app file ' || lcFileName || ' not found! Please contact administrator.');
+        
+    end if;
+    
+END f_get_app_component_script;
+
+
+FUNCTION f_get_app_script(
+    p_app_no number
+) RETURN clob IS
+
+    l_files apex_t_export_files;
+
+BEGIN
+    --get files
+    l_files := apex_export.get_application(
+        p_application_id => p_app_no,
+        p_split => false,
+        --p_with_ir_public_reports => true,
+        p_with_translations => true,
+        p_with_comments => true
+    );
+
+    RETURN l_files(l_files.first).contents;
+
+END f_get_app_script;
+
+
+
+FUNCTION f_get_objects_list(
+    p_object_type varchar2  --values: ORDS
+) RETURN PKG_DOME_INTERFACE.t_objects IS
+
+    lrList PKG_DOME_INTERFACE.t_objects := PKG_DOME_INTERFACE.t_objects();
+
+BEGIN
+    if p_object_type = 'ORDS' then
+        SELECT 
+            name 
+        BULK COLLECT INTO lrList
+        FROM user_ords_modules;
+    end if;
+
+    RETURN lrList;
+END f_get_objects_list;
+
+
+
+FUNCTION f_page_locked_yn(
+    p_app_number number,
+    p_page_number number
+) RETURN varchar2 IS
+
+    lcYesNo varchar2(1);
+
+BEGIN
+    SELECT
+        CASE 
+            WHEN EXISTS 
+                (
+                SELECT 1 
+                FROM apex_application_locked_pages ap
+                WHERE
+                    ap.application_id = p_app_number
+                AND ap.page_id = p_page_number
+                )
+            THEN 'Y'
+            ELSE 'N'
+        END
+    INTO lcYesNo
+    FROM dual;
+
+    RETURN lcYesNo;
+END f_page_locked_yn;
+
+
+PROCEDURE p_lock_page(
+    p_user varchar2,
+    p_application_number number,
+    p_page_number number,
+    p_comment varchar2
+) IS
+BEGIN
+    --TODO
+    
+    /*
+    --==============================================================================
+    -- Locks or updates an existing page lock. The result is returned
+    -- with the following JSON structure:
+    --
+    -- { isUserOwner: true,   // only emitted in case of true
+    --   owner:   "<string>", // only emitted if isUserOwner = flase
+    --   on:      "<string">,
+    --   comment: "<string>"
+    -- }
+    --
+    --==============================================================================
+    procedure lock_page (
+        p_application_id in number,
+        p_page_id        in number,
+        p_comment        in varchar2 );
+    */
+
+/*
+PROCEDURE LOCK_PAGE (
+    P_APPLICATION_ID IN NUMBER,
+    P_PAGE_ID        IN NUMBER,
+    P_COMMENT        IN VARCHAR2 )
+IS
+    L_LOCK T_PAGE_LOCK;
+BEGIN
+    WWV_FLOW_DEBUG.ENTER(
+        'lock_page',
+        'p_application_id', P_APPLICATION_ID,
+        'p_page_id',        P_PAGE_ID,
+        'p_comment',        P_COMMENT );
+
+    WWV_FLOW_JSON.INITIALIZE_OUTPUT (
+        P_HTTP_CACHE => FALSE );
+
+    L_LOCK := GET_PAGE_LOCK_STATE (
+                  P_APPLICATION_ID => P_APPLICATION_ID,
+                  P_PAGE_ID        => P_PAGE_ID );
+
+    
+    
+    
+    
+    IF L_LOCK.LOCKED_BY IS NULL THEN
+
+        INSERT INTO WWV_FLOW_LOCK_PAGE (
+            FLOW_ID,
+            OBJECT_ID,
+            LOCK_COMMENT,
+            LOCKED_BY,
+            LOCKED_ON )
+        VALUES (
+            P_APPLICATION_ID,
+            P_PAGE_ID,
+            P_COMMENT,
+            WWV_FLOW.G_USER,
+            SYSDATE );
+
+    ELSIF L_LOCK.LOCKED_BY = WWV_FLOW.G_USER THEN
+
+        UPDATE WWV_FLOW_LOCK_PAGE
+           SET LOCK_COMMENT = P_COMMENT
+         WHERE FLOW_ID           = P_APPLICATION_ID
+           AND OBJECT_ID         = P_PAGE_ID
+           AND SECURITY_GROUP_ID = WWV_FLOW_SECURITY.G_SECURITY_GROUP_ID;
+
+    END IF;
+
+    
+    EMIT_PAGE_LOCK_STATE (
+        P_APPLICATION_ID => P_APPLICATION_ID,
+        P_PAGE_ID        => P_PAGE_ID,
+        P_OBJECT_NAME    => NULL );
+
+END LOCK_PAGE;
+*/
+    
+    null;
+    
+    --WWV_FLOW_PROPERTY_DEV.lock_page
+END p_lock_page;
+
+PROCEDURE p_unlock_page(
+    p_user varchar2,
+    p_application_number number,
+    p_page_number number
+) IS
+BEGIN
+    --TODO
+
+/*
+--==============================================================================
+-- Unlocks the current page lock. The result is returned
+-- with the following JSON structure:
+--
+-- { status: "OK" / "FAILED",
+--   reason: "<error>"
+-- }
+--
+--==============================================================================
+procedure unlock_page (
+    p_application_id in number,
+    p_page_id        in number );
+
+*/
+    null;
+    --WWV_FLOW_PROPERTY_DEV.unlock_page
+END p_unlock_page;
+
+
+END PKG_DOME_UTILS;
 /
 
 
@@ -1996,7 +2481,7 @@ BEGIN
             p_type => dbo.object_type
         ) as filename
     FROM 
-        dba_objects dbo
+        all_objects dbo
         JOIN v_database_schemas dbs ON dbo.owner = dbs.schema_name
         JOIN object_types obt ON dbo.object_type = obt.code
     WHERE
@@ -2028,7 +2513,7 @@ BEGIN
     AND NOT EXISTS 
         (
         SELECT 1 
-        FROM dba_objects dba_obj
+        FROM all_objects dba_obj
         WHERE
             v_dbo.db_object_name = dba_obj.object_name
         AND v_dbo.object_type_code = dba_obj.object_type
@@ -2177,76 +2662,6 @@ BEGIN
 END p_refresh_app_comp;
 
 
-FUNCTION f_merge_app_component (
-    p_comp_id number,
-    p_app_id number,
-    p_type_code varchar2,
-    p_comp_name varchar2
-) RETURN objects.object_id%TYPE IS
-
-    CURSOR c_data IS
-        SELECT
-            ot.object_type_id,
-            app.application_id as dome_app_id
-        FROM
-            object_types ot
-            CROSS JOIN v_applications app 
-        WHERE
-            ot.code = p_type_code
-        AND app.application_number = p_app_id
-        ; 
-
-    lrData c_data%ROWTYPE;
-
-    lnObjectID objects.object_id%TYPE;
-
-BEGIN
-    --get app component ID
-    BEGIN
-        SELECT
-            app_component_id
-        INTO
-            lnObjectID
-        FROM 
-            v_app_components
-        WHERE
-            application_number = p_app_id
-        AND app_component_number = p_comp_id
-        AND object_type_code = p_type_code
-        ;
-        
-        --if component already exists in DOME register -> update name
-        UPDATE objects 
-        SET name = p_comp_name
-        WHERE object_id = lnObjectID;
-        
-    EXCEPTION WHEN no_data_found THEN
-        --if component doesn't exist in DOME register -> add component to register
-        OPEN c_data;
-        FETCH c_data INTO lrData;
-        CLOSE c_data;
-    
-        INSERT INTO objects (
-            object_type_id, 
-            name, 
-            filename, 
-            parent_object_id, 
-            aa_number_01
-        )
-        VALUES (
-            lrData.object_type_id,
-            p_comp_name,
-            lower(p_type_code) || '_' || p_app_id || '_' || p_comp_id || '.sql',
-            lrData.dome_app_id,
-            p_comp_id
-        )
-        RETURNING object_id INTO lnObjectID
-        ;
-    END;
-    
-    RETURN lnObjectID;
-    
-END f_merge_app_component;
 
 
 FUNCTION f_create_db_object(
@@ -3050,6 +3465,19 @@ BEGIN
     
 END f_patch_warnings;
 
+
+PROCEDURE p_move_tasks (
+    p_new_group_id task_groups.task_group_id%TYPE 
+) IS
+BEGIN
+    UPDATE tasks
+    SET task_group_id = p_new_group_id
+    WHERE 
+        task_id in 
+            (SELECT to_number(c001) FROM apex_collections WHERE collection_name = 'SELECTED_TASKS_COLL')
+    ;
+END p_move_tasks;
+
 END PKG_PATCHES;
 /
 
@@ -3148,184 +3576,6 @@ EXCEPTION WHEN no_data_found THEN
     RETURN null;
 
 END f_object_in_another_patch_err;
-
-
-PROCEDURE p_prepare_component_list (
-    p_patch_id patches.patch_id%TYPE,
-    p_current_user_id app_users.app_user_id%TYPE 
-) IS
-
-    CURSOR c_apps IS
-        SELECT 
-            app.application_number as application_id
-        FROM 
-            project_apps pa
-            JOIN v_patches p ON pa.project_id = p.project_id
-            JOIN v_applications app ON pa.object_id = app.application_id
-        WHERE 
-            p.patch_id = p_patch_id
-        ;
-
-    lrApps coll_dome_num;
-    ldPatchCreateDate patches.created_on%TYPE;
-    
-    TYPE t_users IS TABLE OF varchar2(128) INDEX BY varchar2(30);
-    lrUsers t_users;
-
-    CURSOR c_objects IS
-        SELECT
-            ec.application_id,
-            ec.id,
-            ec.application_name,
-            ec.type_name,
-            ec.name,
-            ec.last_updated_by,
-            ec.last_updated_on,
-            ec.workspace,
-            CASE WHEN ec.last_updated_on >= ldPatchCreateDate THEN 'Yes' ELSE 'No' END as changed_after_patch,
-            'Yes' as last_changed_by_me
-        FROM 
-            apex_appl_export_comps ec
-        WHERE
-            ec.application_id member of lrApps
-        ORDER BY ec.last_updated_on desc nulls last
-        ;
-        
-        TYPE t_objects IS TABLE OF c_objects%ROWTYPE;
-        lrObjects t_objects;
-
-BEGIN
-    --get app list (all project apps - project is determined from current patch)
-    OPEN c_apps;
-    FETCH c_apps BULK COLLECT INTO lrApps;
-    CLOSE c_apps;
-    
-    --get patch create date
-    ldPatchCreateDate := pkg_patches.f_get_v_patch(p_patch_id).created_on;
-    
-    --get objects for applications
-    OPEN c_objects;
-    FETCH c_objects BULK COLLECT INTO lrObjects;
-    CLOSE c_objects;
-    
-    
-    --read current user's APEX usernames for workspaces
-    FOR t IN 
-        (
-        SELECT
-            apex_user_name,
-            workspace_name
-        FROM v_workspace_users 
-        WHERE app_user_id = p_current_user_id
-        ) LOOP
-    
-        lrUsers(t.workspace_name) := t.apex_user_name;
-        
-    END LOOP;
-    
-    --set "last changed by me" flag (based on workspace and APEX user name)
-    FOR t IN 1 .. lrObjects.count LOOP
-        lrObjects(t).last_changed_by_me := 
-            CASE 
-                WHEN lrObjects(t).last_updated_by = lrUsers(lrObjects(t).workspace) THEN 'Yes'
-                ELSE 'No'
-            END;
-    END LOOP;
-    
-    --fill APEX collection
-    APEX_COLLECTION.create_or_truncate_collection(gcCompListCollName);
-    
-    /*
-    n001 as application_id,
-    c001 as application_name,
-    c002 as type_name,
-    c003 as name,
-    c004 as last_updated_by,
-    d001 as last_updated_on,
-    c005 as workspace,
-    c006 as last_changed_by_me,
-    c007 as changed_after_patch
-    */
-    FOR t IN 1 .. lrObjects.count LOOP
-        APEX_COLLECTION.add_member (
-            p_collection_name => gcCompListCollName,
-            p_n001 => lrObjects(t).application_id,
-            p_c001 => lrObjects(t).application_name,
-            p_c002 => lrObjects(t).type_name,
-            p_n002 => lrObjects(t).id,
-            p_c003 => lrObjects(t).name,
-            p_c004 => lrObjects(t).last_updated_by,
-            p_d001 => lrObjects(t).last_updated_on,
-            p_c005 => lrObjects(t).workspace,
-            p_c006 => lrObjects(t).last_changed_by_me,
-            p_c007 => lrObjects(t).changed_after_patch
-        );
-    END LOOP;
-    
-    
-
-END p_prepare_component_list;
-
-
-FUNCTION f_comp_list_coll_name RETURN varchar2 IS
-BEGIN
-    RETURN gcCompListCollName;
-END f_comp_list_coll_name;
-
-
-PROCEDURE p_add_app_comp_to_patch (
-    p_patch_id patches.patch_id%TYPE,
-    p_current_user_id app_users.app_user_id%TYPE 
-) IS
-
-    lrSeq coll_dome_num := coll_dome_num();
-
-    CURSOR c_components IS
-        SELECT
-            ac.n001 as application_id,
-            ac.c002 as type_code,
-            ac.c003 as name,
-            ac.n002 as component_id,
-            0 as dome_component_id 
-        FROM 
-            apex_collections ac
-            JOIN (SELECT to_number(column_value) as seq_id FROM table(lrSeq) ) tbl ON ac.seq_id = tbl.seq_id  --only selected components
-        ;
-
-    TYPE t_components IS TABLE OF c_components%ROWTYPE;
-    lrComp t_components;
-
-BEGIN
-    --selected components (seq_id from APEX collection) to DB collection
-    lrSeq.extend( apex_application.g_f01.count );
-    FOR t IN 1 .. apex_application.g_f01.count LOOP
-        lrSeq(t) := apex_application.g_f01(t);
-    END LOOP;
-
-    --read components
-    OPEN c_components;
-    FETCH c_components BULK COLLECT INTO lrComp;
-    CLOSE c_components;
-
-    --insert or update components and add components to patch
-    FOR t IN 1 .. lrComp.count LOOP
-        lrComp(t).dome_component_id := pkg_objects.f_merge_app_component (
-            p_comp_id => lrComp(t).component_id,
-            p_app_id => lrComp(t).application_id,
-            p_type_code => lrComp(t).type_code,
-            p_comp_name => lrComp(t).name
-        );
-        
-        p_add_object_to_patch (
-            p_object_id => lrComp(t).dome_component_id,
-            p_patch_id => p_patch_id,
-            p_user_id => p_current_user_id
-        );
-    
-        --apex_debug.message( 'Selected component: ' || lrComp(t).dome_component_id || '; ' || lrComp(t).type_code || ' - ' || lrComp(t).name);
-    END LOOP;
-    
-END p_add_app_comp_to_patch;
 
 
 END PKG_PATCH_OBJECTS;
@@ -3666,161 +3916,6 @@ BEGIN
     
 END p_parse_zip;
 
-
-PROCEDURE p_opal_prepare_files(
-    p_id patches.patch_id%TYPE,
-    p_patch_or_release varchar2,  --values PATCH or RELEASE
-    p_file_name patch_template_files.file_name%TYPE,
-    p_usage_type patch_template_files.usage_type%TYPE,
-    p_file_content IN OUT patch_template_files.file_content%TYPE,
-    p_add_file_yn OUT varchar2
-) IS
-
-    lcClob clob := pkg_utils.f_blob_to_clob(p_file_content);
-    lbConvertToBlob boolean := false;
-
-    CURSOR c_data IS
-        SELECT 
-            project_name,
-            task_code as code,
-            task_code_and_name as name,
-            user_created,
-            'P_' || patch_id as id,
-            '1.' || patch_number as version,
-            user_comments,
-            release_notes
-        FROM v_patches
-        WHERE 
-            patch_id = p_id
-        AND p_patch_or_release = 'PATCH'
-        UNION ALL
-        SELECT
-            project as project_name,
-            code as code,
-            display as name,
-            user_created_display_name as user_created,
-            'R_' || release_id as id,
-            '1.0' as version,
-            null as user_comments,
-            null as release_notes
-        FROM v_releases
-        WHERE 
-            release_id = p_id
-        AND p_patch_or_release = 'RELEASE'
-        ;
-
-    lrData c_data%ROWTYPE;
-
-BEGIN
-    --placeholders data
-    OPEN c_data;
-    FETCH c_data INTO lrData;
-    CLOSE c_data;
-    
-
-    if p_file_name = 'opal-installer.json' then
-        --replace placeholders
-        lbConvertToBlob := true;
-        
-        lcClob := replace(lcClob, '__APP_NAME__', lrData.project_name);
-        lcClob := replace(lcClob, '__CODE__', lrData.code);
-        lcClob := replace(lcClob, '__NAME__', replace(lrData.name, '"', null) );
-        lcClob := replace(lcClob, '__AUTHOR__', lrData.user_created);
-        lcClob := replace(lcClob, '__REF_ID__', lrData.id);  --P patch or R release
-        lcClob := replace(lcClob, '__VERSION__', lrData.version);
-        lcClob := replace(lcClob, '__EXTRA__', lrData.user_comments);
-
-    elsif p_file_name = 'ReleaseNotes.txt' and lrData.release_notes is not null then
-        lbConvertToBlob := true;
-        lcClob := lrData.release_notes;
-
-    end if;
-    
-    
-    --convert clob back to blob (if necessary)
-    if lbConvertToBlob then
-        p_file_content := pkg_utils.f_clob_to_blob(lcClob);
-    end if;
-    
-    p_add_file_yn := 'Y';
-    
-END p_opal_prepare_files;
-
-
-
-PROCEDURE p_opal_template_files(
-    p_id patches.patch_id%TYPE,
-    p_patch_or_release varchar2,  --values PATCH or RELEASE
-    p_files OUT t_files
-) IS
-
-    CURSOR c_patch_template IS
-        SELECT patch_template_id
-        FROM v_patches
-        WHERE 
-            patch_id = p_id
-        AND p_patch_or_release = 'PATCH'
-        UNION ALL 
-        SELECT patch_template_id
-        FROM v_releases
-        WHERE 
-            release_id = p_id
-        AND p_patch_or_release = 'RELEASE'
-    ;
-    
-    lrPatchTemplate c_patch_template%ROWTYPE;
-    lrFiles t_files := t_files();
-    lcAddFileYN varchar2(1);
-
-    PROCEDURE p_add_output_file(
-        p_file_name patch_template_files.file_name%TYPE,
-        p_file_content patch_template_files.file_content%TYPE,
-        p_usage_type patch_template_files.usage_type%TYPE
-    ) IS
-    BEGIN
-        p_files.extend;
-
-        p_files(p_files.count).file_name := p_file_name;
-        p_files(p_files.count).file_content := p_file_content;
-        p_files(p_files.count).usage_type := p_usage_type;
-    END;
-
-BEGIN
-    p_files := t_files();
-
-    --patch template data
-    OPEN c_patch_template;
-    FETCH c_patch_template INTO lrPatchTemplate;
-    CLOSE c_patch_template;
-
-    --get files (cursor is defined in package spec)
-    OPEN c_files(lrPatchTemplate.patch_template_id);
-    FETCH c_files BULK COLLECT INTO lrFiles;
-    CLOSE c_files;
-    
-    --replace placeholders
-    FOR t IN 1 .. lrFiles.count LOOP
-    
-        p_opal_prepare_files(
-            p_id => p_id,
-            p_patch_or_release => p_patch_or_release,
-            p_file_name => lrFiles(t).file_name,
-            p_usage_type => lrFiles(t).usage_type,
-            p_file_content => lrFiles(t).file_content,
-            p_add_file_yn => lcAddFileYN
-        );
-        
-        if lcAddFileYN = 'Y' then
-            p_add_output_file(
-                p_file_name => lrFiles(t).file_name,
-                p_file_content => lrFiles(t).file_content,
-                p_usage_type => lrFiles(t).usage_type
-            );
-        end if;
-        
-    END LOOP;
-    
-END p_opal_template_files;
 
 END pkg_patch_templates;
 /
@@ -4176,45 +4271,10 @@ END f_script_target_filename;
 FUNCTION f_prepare_patch_files(
     p_patch_id patches.patch_id%TYPE,
     p_main_folder_name_prefix varchar2 default null 
-) RETURN t_files AS
+) RETURN pkg_releases.t_files AS
 
     lrPatch pkg_patches.c_patch%ROWTYPE;
-    lcInstallScript clob;
-    lrTemplateFiles pkg_patch_templates.t_files;
-    lnSchemaCounter pls_integer := 0;
-    lcSchema varchar2(128);
-    lrFiles t_files := t_files();
-
-    CURSOR c_patch_files IS
-        --objects
-        SELECT
-            v_pso.object_id,
-            v_pso.filename,
-            v_pso.object_type,
-            v_pso.sql_content as clob_file,
-            pkg_utils.f_clob_to_blob(v_pso.sql_content) as blob_file,
-            v_pso.schema_name,
-            CASE 
-                WHEN v_pso.schema_name <> lag(v_pso.schema_name, 1, 'not existing one') over (order by v_pso.seq_nr, v_pso.seq_nr2) THEN 'Y' 
-                ELSE 'N' 
-            END as change_schema_yn
-        FROM v_patch_scr_and_obj v_pso
-        WHERE 
-            v_pso.patch_id = p_patch_id
-        AND v_pso.object_as_patch_script_yn = 'N'
-        ORDER BY v_pso.seq_nr, v_pso.seq_nr2
-        ;
-    
-    PROCEDURE p_add_file(
-        p_filename varchar2,
-        p_file_content blob
-    ) IS
-    BEGIN
-        lrFiles.extend;
-        
-        lrFiles(lrFiles.count).filename := p_main_folder_name_prefix || p_filename;
-        lrFiles(lrFiles.count).file_content := p_file_content;
-    END p_add_file;
+    lrFiles pkg_releases.t_files := pkg_releases.t_files();
 
 BEGIN
     --patch data
@@ -4222,69 +4282,16 @@ BEGIN
     FETCH pkg_patches.c_patch INTO lrPatch;
     CLOSE pkg_patches.c_patch;
 
-    /*
-    patch template files 
-    placeholders will be replaced in this procedure
-    manual files are generated
-    */
-    if lrPatch.patch_procedure_name is not null then
-
-        EXECUTE IMMEDIATE 'BEGIN ' || lrPatch.patch_procedure_name || '(p_id => :1, p_patch_or_release => ''PATCH'', p_files => :2); END;' 
-        USING IN p_patch_id, OUT lrTemplateFiles;
-
-        --add patch files to patch ZIP (schema level files will be added for every schema later in code)
-        FOR t IN 1 .. lrTemplateFiles.count LOOP
-            if lrTemplateFiles(t).usage_type <> 'SL' then
-                p_add_file(
-                    p_filename => lrPatch.root_folder || lrTemplateFiles(t).file_name,
-                    p_file_content => lrTemplateFiles(t).file_content
-                );
-            end if;
+    EXECUTE IMMEDIATE 'BEGIN ' || lrPatch.patch_procedure_name || '(p_id => :1, p_patch_or_release => ''P'', p_files => :2); END;' 
+    USING IN p_patch_id, OUT lrFiles;
+    
+    --for release - store patches within sub-folder
+    if p_main_folder_name_prefix is not null then
+        FOR t IN 1 .. lrFiles.count LOOP
+            lrFiles(t).filename := p_main_folder_name_prefix || lrFiles(t).filename;
         END LOOP;
-
     end if;
 
-
-    --object files
-    FOR t IN c_patch_files LOOP
-        
-        --if schema changes set schema name with counter prefix
-        --also add template script files of type schema level (SL)
-        if t.change_schema_yn = 'Y' then
-            lnSchemaCounter := lnSchemaCounter + 10;
-            lcSchema := to_char(lnSchemaCounter, 'fm000') || '_' || lower(t.schema_name);
-            
-            FOR f IN 1 .. lrTemplateFiles.count LOOP
-                if lrTemplateFiles(f).usage_type = 'SL' then
-                    p_add_file(
-                        p_filename => lrPatch.root_folder || replace(lrTemplateFiles(f).file_name, '#SCHEMA#', lcSchema),
-                        p_file_content => lrTemplateFiles(f).file_content
-                    );
-                end if;
-            END LOOP;
-            
-        end if;
-    
-
-        --wrap package body if selected
-        if pkg_wrap.f_wrap_object_yn(
-                p_object_id => t.object_id,
-                p_project_id => lrPatch.project_id
-            ) = 'Y' then
-            
-            t.blob_file := pkg_utils.f_clob_to_blob(
-                pkg_wrap.f_wrap(t.clob_file)
-            );
-            
-        end if;
-        
-        p_add_file(
-            p_filename => lrPatch.root_folder || replace(t.filename, '#SCHEMA#', lcSchema),
-            p_file_content => t.blob_file
-        );
-        
-    END LOOP;
-    
     RETURN lrFiles;
     
 END f_prepare_patch_files;
@@ -4298,7 +4305,7 @@ PROCEDURE p_prepare_patch_zip(
 ) AS
 
     lrPatch pkg_patches.c_patch%ROWTYPE;
-    lrFiles t_files := t_files();
+    lrFiles pkg_releases.t_files := pkg_releases.t_files();
     
 BEGIN
     --patch data
@@ -4330,28 +4337,15 @@ END p_prepare_patch_zip;
 
 
 
-PROCEDURE p_prepare_rls_zip(
+FUNCTION f_prepare_rls_files(
     p_release_id releases.release_id%TYPE,
-    p_merge_files_yn varchar2 default 'N',
-    p_zip IN OUT blob,
-    p_filename OUT varchar2
-) IS
+    p_merge_files_yn varchar2 default 'N'
+) RETURN pkg_releases.t_files IS
 
-    lrPatchFiles t_files;
-    lnCounter pls_integer := 0;
-    lrTemplateFiles pkg_patch_templates.t_files;
-
-    CURSOR c_patches IS
-        SELECT patch_id
-        FROM patches
-        WHERE release_id = p_release_id
-        ORDER BY 
-            release_order asc,
-            confirmed_on asc;
+    lrReleaseFiles t_files;
 
     CURSOR c_patch_template IS
         SELECT 
-            r.patch_template_sql_subfolder as sql_subfolder,
             r.patch_template_procedure_name as procedure_name
         FROM v_releases r
         WHERE r.release_id = p_release_id
@@ -4359,82 +4353,19 @@ PROCEDURE p_prepare_rls_zip(
 
     lrPatchTemplate c_patch_template%ROWTYPE;
 
-    CURSOR c_rls_files IS
-        SELECT
-            pkg_utils.f_clob_to_blob(sql_content) as sql_content,
-            f_rls_code(p_release_id) || '/' || filename_for_zip as filename_for_zip
-        FROM 
-            v_release_scripts
-        WHERE
-            release_id = p_release_id
-        ;
-    
-
 BEGIN
-    --patch template data
+    --patch template procedure name and patches subfolder (used for release)
     OPEN c_patch_template;
     FETCH c_patch_template INTO lrPatchTemplate;
     CLOSE c_patch_template;
 
-
-    --patch template main files
-    if lrPatchTemplate.procedure_name is not null then
-
-        EXECUTE IMMEDIATE 'BEGIN ' || lrPatchTemplate.procedure_name || '(p_id => :1, p_patch_or_release => ''RELEASE'', p_files => :2); END;' 
-        USING IN p_release_id, OUT lrTemplateFiles;
-
-        --add patch template files to release ZIP
-        FOR t IN 1 .. lrTemplateFiles.count LOOP
-            if lrTemplateFiles(t).usage_type <> 'SL' then
-                apex_zip.add_file(
-                    p_zipped_blob => p_zip, 
-                    p_file_name => f_rls_code(p_release_id) || '/' || lrTemplateFiles(t).file_name,
-                    p_content => lrTemplateFiles(t).file_content
-                );
-            end if;
-        END LOOP;
-
-    end if;
-
-
-    --get release script files and add them to ZIP
-    FOR t IN c_rls_files LOOP
-        apex_zip.add_file(
-            p_zipped_blob => p_zip, 
-            p_file_name => t.filename_for_zip,
-            p_content => t.sql_content
-        );
-    END LOOP;
+    --get files
+    EXECUTE IMMEDIATE 'BEGIN ' || lrPatchTemplate.procedure_name || '(p_id => :1, p_patch_or_release => ''RELEASE'', p_files => :2); END;' 
+    USING IN p_release_id, OUT lrReleaseFiles;
     
-
-    --get files from patches and add them to release ZIP
-    FOR t IN c_patches LOOP
-        lnCounter := lnCounter + 10;
-        
-        lrPatchFiles := f_prepare_patch_files(
-            p_patch_id => t.patch_id,
-            p_main_folder_name_prefix => 
-                f_rls_code(p_release_id) || '/' ||
-                CASE WHEN lrPatchTemplate.sql_subfolder is not null THEN lrPatchTemplate.sql_subfolder || '/' ELSE null END ||
-                to_char(lnCounter, 'fm000') || '_'
-        );
-        
-        FOR f IN 1 .. lrPatchFiles.count LOOP
-            apex_zip.add_file(
-                p_zipped_blob => p_zip, 
-                p_file_name => lrPatchFiles(f).filename,
-                p_content => lrPatchFiles(f).file_content
-            );
-        END LOOP;
-        
-    END LOOP;
-
-    --filename and finish ZIP
-    p_filename := f_rls_code(p_release_id) || '.zip';
+    RETURN lrReleaseFiles;
     
-    apex_zip.finish(p_zip);
-    
-END p_prepare_rls_zip;
+END f_prepare_rls_files;
 
 
 PROCEDURE p_download_rls_zip(
@@ -4443,21 +4374,30 @@ PROCEDURE p_download_rls_zip(
 ) IS
 
     lbZip blob;
-    lcFilename varchar2(1000);
+    lrFiles pkg_releases.t_files;
 
 BEGIN
-    --get ZIP
-    p_prepare_rls_zip(
+    --get all release files
+    lrFiles := f_prepare_rls_files (
         p_release_id => p_release_id,
-        p_merge_files_yn => p_merge_files_yn,
-        p_zip => lbZip,
-        p_filename => lcFilename
+        p_merge_files_yn => p_merge_files_yn
     );
+    
+    --prepare ZIP
+    FOR t IN 1 .. lrFiles.count LOOP
+        apex_zip.add_file(
+            p_zipped_blob => lbZip, 
+            p_file_name => lrFiles(t).filename,
+            p_content => lrFiles(t).file_content
+        );
+    END LOOP;
 
-    --download document
+    apex_zip.finish(lbZip);
+
+    --get filename and download ZIP file
     pkg_utils.p_download_document(
         p_doc => lbZip,
-        p_file_name => lcFilename
+        p_file_name => f_rls_code(p_release_id) || '.zip'
     );
 
 END p_download_rls_zip;
@@ -4783,6 +4723,381 @@ BEGIN
 END f_release_patches;
 
 END PKG_RELEASES;
+/
+
+
+--
+-- PKG_SCRIPTS  (Package Body) 
+--
+CREATE OR REPLACE PACKAGE BODY pkg_scripts as
+
+
+PROCEDURE p_add_text (
+    p_file IN OUT clob,
+    p_text varchar2
+) IS
+BEGIN
+    p_file := p_file || p_text || chr(10);
+END p_add_text;
+
+
+PROCEDURE p_add_output_file (
+    p_root_folder varchar2,
+    p_file_list IN OUT pkg_releases.t_files,
+    p_file_name varchar2,
+    p_file_content blob
+) IS
+BEGIN
+    p_file_list.extend;
+
+    p_file_list(p_file_list.count).filename := p_root_folder || p_file_name;
+    p_file_list(p_file_list.count).file_content := p_file_content;
+    
+END p_add_output_file;
+
+
+PROCEDURE p_sqlplus_multiple_files_p (
+    p_id number,  --patch or release ID
+    p_patch_or_release varchar2,  --values P or R
+    p_files OUT pkg_releases.t_files
+) IS
+
+    lrData pkg_patch_templates.c_template_data%ROWTYPE;
+    lrTemplateFiles pkg_patch_templates.t_patch_template_files;
+    lrPatchFiles pkg_patches.t_patch_files;
+    lrSchemas pkg_patches.t_patch_schemas;
+
+    lcClob clob;
+    lcFilename varchar2(4000);
+    lcReference varchar2(20) := p_patch_or_release || '_' || p_id;
+    
+BEGIN
+    p_files := pkg_releases.t_files();
+
+    --patch or release data (cursor is defined in package spec)
+    OPEN pkg_patch_templates.c_template_data (
+        p_id => p_id,
+        p_patch_or_release => p_patch_or_release
+    );
+    FETCH pkg_patch_templates.c_template_data INTO lrData;
+    CLOSE pkg_patch_templates.c_template_data;
+
+    --patch database schemas
+    OPEN pkg_patches.c_patch_schemas(p_id);
+    FETCH pkg_patches.c_patch_schemas BULK COLLECT INTO lrSchemas;
+    CLOSE pkg_patches.c_patch_schemas;
+
+
+    --TEMPLATE FILES
+    
+    --get template files (cursor is defined in package spec)
+    OPEN pkg_patch_templates.c_patch_template_files(lrData.patch_template_id);
+    FETCH pkg_patch_templates.c_patch_template_files BULK COLLECT INTO lrTemplateFiles;
+    CLOSE pkg_patch_templates.c_patch_template_files;
+
+    --replace placeholders and add files to output collection
+    FOR t IN 1 .. lrTemplateFiles.count LOOP
+        
+        if lrTemplateFiles(t).usage_type <> 'B' then  --non-binary files -> replace placeholders
+            lcClob := pkg_utils.f_blob_to_clob(lrTemplateFiles(t).file_content);
+            
+            lcClob := replace(lcClob, '__APP_NAME__', lrData.project_name);
+            lcClob := replace(lcClob, '__CODE__', lrData.code);
+            lcClob := replace(lcClob, '__NAME__', lrData.name);
+            lcClob := replace(lcClob, '__AUTHOR__', lrData.user_created);
+            lcClob := replace(lcClob, '__VERSION__', lrData.version);
+            lcClob := replace(lcClob, '__COMMENT__', lrData.user_comments);
+            lcClob := replace(lcClob, '__RELEASE_NOTES__', lrData.release_notes);
+            
+            lrTemplateFiles(t).file_content := pkg_utils.f_clob_to_blob(lcClob);
+            
+
+            if lrTemplateFiles(t).usage_type = 'SL' then  --multiply schema level files for every schema
+            
+                FOR s IN 1 .. lrSchemas.count LOOP
+                    lcFilename := replace(lrTemplateFiles(t).file_name, '#SCHEMA#', lower(lrSchemas(s).schema_name) );
+                
+                    p_add_output_file(
+                        p_root_folder => lrData.root_folder,
+                        p_file_list => p_files,
+                        p_file_name => lcFilename,
+                        p_file_content => lrTemplateFiles(t).file_content
+                    );
+                END LOOP;
+
+            else  --add single file to output collection
+                p_add_output_file(
+                    p_root_folder => lrData.root_folder,
+                    p_file_list => p_files,
+                    p_file_name => lrTemplateFiles(t).file_name,
+                    p_file_content => lrTemplateFiles(t).file_content
+                );
+                
+            end if;
+        
+        else  --binary files -> just add to collection
+            p_add_output_file(
+                p_root_folder => lrData.root_folder,
+                p_file_list => p_files,
+                p_file_name => lrTemplateFiles(t).file_name,
+                p_file_content => lrTemplateFiles(t).file_content
+            );
+        
+        end if;
+        
+    END LOOP;
+    
+
+    
+    --PATCH FILES
+    OPEN pkg_patches.c_patch_files (
+        p_patch_id => p_id
+    );
+    FETCH pkg_patches.c_patch_files BULK COLLECT INTO lrPatchFiles;
+    CLOSE pkg_patches.c_patch_files;
+    
+    lcClob := null;  --will store main install.sql file
+    
+    p_add_text(lcClob,  'PROMPT Install scripts for patch ' || lrData.name);
+    p_add_text(lcClob,  '--' );
+    p_add_text(lcClob,  'SPOOL log/log.txt' );
+    p_add_text(lcClob,  '--' );
+    p_add_text(lcClob,  'PROMPT Start install' );
+    p_add_text(lcClob,  'connect &&schema_DEV.');
+    p_add_text(lcClob,  'BEGIN' );
+    p_add_text(lcClob,  '    pkg_interface.p_ext_install_start (
+        p_ext_system_code => ''SQLPLUS'',
+        p_ext_system_ref => ''' || lcReference || ''',
+        p_reference => ''' || lcReference || ''',
+        p_environment => ''&&myEnv.''
+    );' );
+    p_add_text(lcClob,  'END;' );
+    p_add_text(lcClob,  '/' );
+
+
+    
+    FOR t IN 1 .. lrPatchFiles.count LOOP
+    
+        p_add_output_file(
+            p_root_folder => lrData.root_folder,
+            p_file_list => p_files,
+            p_file_name => lrPatchFiles(t).filename,
+            p_file_content => lrPatchFiles(t).blob_file
+        );
+        
+        if lrPatchFiles(t).change_schema_yn = 'Y' then
+            p_add_text(lcClob,  'PROMPT Please enter connect string for schema ' || lrPatchFiles(t).schema_name);
+            p_add_text(lcClob,  'connect &&schema_' || lrPatchFiles(t).schema_name || '.');
+        end if;
+        
+        p_add_text(lcClob,  '@' || lrPatchFiles(t).filename);
+    END LOOP;
+
+    p_add_text(lcClob,  '--' );
+    p_add_text(lcClob,  'PROMPT Install end' );
+    p_add_text(lcClob,  'connect &&schema_DEV.');
+    p_add_text(lcClob,  'BEGIN' );
+    p_add_text(lcClob,  '    pkg_interface.p_ext_install_stop (
+        p_ext_system_code => ''SQLPLUS'',
+        p_ext_system_ref => ''' || lcReference || '''
+    );' );
+    p_add_text(lcClob,  'END;' );
+    p_add_text(lcClob,  '/' );
+
+
+    p_add_text(lcClob,  'SPOOL off' );
+    
+    p_add_output_file(
+        p_root_folder => lrData.root_folder,
+        p_file_list => p_files,
+        p_file_name => 'install.sql',
+        p_file_content => pkg_utils.f_clob_to_blob(lcClob)
+    );
+   
+END p_sqlplus_multiple_files_p;
+
+
+
+PROCEDURE p_sqlplus_release_p (
+    p_id number,  --patch or release ID
+    p_patch_or_release varchar2,  --values P or R
+    p_files OUT pkg_releases.t_files
+) IS
+
+    CURSOR c_patches IS
+        SELECT 
+            patch_id,
+            display,
+            filename_without_extension
+        FROM v_patches
+        WHERE release_id = p_id
+        ORDER BY 
+            release_order asc,
+            confirmed_on asc
+    ;
+
+    lrPatchFiles pkg_releases.t_files;
+    lrTemplateFiles pkg_patch_templates.t_patch_template_files;
+    lrRelease v_releases%ROWTYPE; 
+    lnCounter pls_integer := 0;
+    lnMainPatchesFolder varchar2(1000);
+    lcClob clob;
+    lcPatchList clob;
+
+    PROCEDURE p_release_scripts (
+        p_script_type_code release_script_types.code%TYPE
+    ) IS
+
+    CURSOR c_rls_files IS
+        SELECT
+            filename_for_zip,
+            pkg_utils.f_clob_to_blob(sql_content) as blob_file,
+            schema_name,
+            CASE 
+                WHEN schema_name <> lag(schema_name, 1, 'not existing one') over (order by schema_name, order_by) THEN 'Y' 
+                ELSE 'N' 
+            END as change_schema_yn
+        FROM v_release_scripts
+        WHERE 
+            release_id = p_id
+        AND script_type_code = p_script_type_code
+        ORDER BY
+            order_by
+    ;
+    
+    TYPE t_rls_files IS TABLE OF c_rls_files%ROWTYPE;
+    lrRlsFiles t_rls_files;
+
+    BEGIN
+        --get release files
+        OPEN c_rls_files;
+        FETCH c_rls_files BULK COLLECT INTO lrRlsFiles;
+        CLOSE c_rls_files;
+        
+        if lrRlsFiles.count > 0 then
+            p_add_text(lcClob,  'PROMPT Installing ' || p_script_type_code || 'scripts...' );
+        end if;
+
+        FOR t IN 1 .. lrRlsFiles.count LOOP
+        
+            if lrRlsFiles(t).change_schema_yn = 'Y' then
+                p_add_text(lcClob,  'PROMPT Please enter connect string for schema ' || lrRlsFiles(t).schema_name);
+                p_add_text(lcClob,  'connect &&schema_' || lrRlsFiles(t).schema_name || '.');
+            end if;
+            
+            p_add_text(lcClob,  '@' || lrRlsFiles(t).filename_for_zip);
+            
+            p_add_output_file(
+                p_root_folder => lrRelease.code || '/',
+                p_file_list => p_files,
+                p_file_name => lrRlsFiles(t).filename_for_zip,
+                p_file_content => lrRlsFiles(t).blob_file
+            );
+        
+        END LOOP;
+        
+    END p_release_scripts;
+
+BEGIN
+    --initialize collection
+    p_files := pkg_releases.t_files();
+
+    --get release record
+    SELECT * 
+    INTO lrRelease
+    FROM v_releases r
+    WHERE r.release_id = p_id
+    ;
+
+    --get template files (cursor is defined in package spec)
+    OPEN pkg_patch_templates.c_patch_template_files(lrRelease.patch_template_id);
+    FETCH pkg_patch_templates.c_patch_template_files BULK COLLECT INTO lrTemplateFiles;
+    CLOSE pkg_patch_templates.c_patch_template_files;
+
+    --add template files to release - currently just static files, without modifications
+    FOR t IN 1 .. lrTemplateFiles.count LOOP
+        p_add_output_file(
+            p_root_folder => lrRelease.code || '/',
+            p_file_list => p_files,
+            p_file_name => lrTemplateFiles(t).file_name,
+            p_file_content => lrTemplateFiles(t).file_content
+        );
+    END LOOP;
+
+
+    --initialize and fill main install.sql file
+    lcClob := null;  --will store main install.sql file
+    lcPatchList := null;  --will store patch list file
+    
+    p_add_text(lcClob,  'PROMPT Install scripts for release ' || lrRelease.display);
+    p_add_text(lcClob,  '---' );
+    p_add_text(lcClob,  '---' );
+
+    p_release_scripts(
+        p_script_type_code => 'PRE_RLS'
+    );
+
+    --process patches
+    FOR ptch IN c_patches LOOP
+        --get patches files and add it to release files list
+        lnCounter := lnCounter + 10;
+
+        lnMainPatchesFolder := 
+            lrRelease.code || '/' ||
+            CASE WHEN lrRelease.patch_template_sql_subfolder is not null THEN lrRelease.patch_template_sql_subfolder || '/' ELSE null END ||
+            to_char(lnCounter, 'fm000') || '_'
+            
+        ;
+
+        lrPatchFiles := pkg_releases.f_prepare_patch_files (
+            p_patch_id => ptch.patch_id,
+            p_main_folder_name_prefix => lnMainPatchesFolder
+        );
+        
+        p_files := p_files MULTISET UNION ALL lrPatchFiles;
+        
+        --add lines to main release install.sql file
+        p_add_text(lcClob, 'PROMPT Start install for patch ' || ptch.display );
+        p_add_text(lcClob, 
+            '@' || 
+            CASE WHEN lrRelease.patch_template_sql_subfolder is not null THEN lrRelease.patch_template_sql_subfolder || '/' ELSE null END ||
+            to_char(lnCounter, 'fm000') || '_' ||
+            ptch.filename_without_extension || '/install.sql'
+        );
+        p_add_text(lcClob, '---' );
+
+        --patch list document
+        p_add_text(lcPatchList, ptch.display);
+
+    END LOOP;
+
+    p_release_scripts(
+        p_script_type_code => 'POST_RLS'
+    );
+
+    p_add_text(lcClob, '---' );
+    p_add_text(lcClob, 'PROMPT Install end' );
+
+
+    --add main install.sql to patch
+    p_add_output_file(
+        p_root_folder => lrRelease.code || '/',
+        p_file_list => p_files,
+        p_file_name => 'install.sql',
+        p_file_content => pkg_utils.f_clob_to_blob(lcClob)
+    );
+
+    --documentation/patch_list.txt
+    p_add_output_file(
+        p_root_folder => lrRelease.code || '/',
+        p_file_list => p_files,
+        p_file_name => 'documentation/patch_list.txt',
+        p_file_content => pkg_utils.f_clob_to_blob(lcPatchList)
+    );
+
+END p_sqlplus_release_p;
+
+END pkg_scripts;
 /
 
 
