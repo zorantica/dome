@@ -28,17 +28,17 @@ prompt APPLICATION 150 - DOME
 -- Application Export:
 --   Application:     150
 --   Name:            DOME
---   Date and Time:   18:53 Friday January 13, 2023
+--   Date and Time:   20:50 Friday January 27, 2023
 --   Exported By:     ZORAN
 --   Flashback:       0
 --   Export Type:     Application Export
 --     Pages:                     56
---       Items:                  146
+--       Items:                  144
 --       Computations:             4
 --       Validations:              7
---       Processes:               95
---       Regions:                125
---       Buttons:                 99
+--       Processes:               94
+--       Regions:                124
+--       Buttons:                 97
 --       Dynamic Actions:         63
 --     Shared Components:
 --       Logic:
@@ -70,7 +70,7 @@ prompt APPLICATION 150 - DOME
 --       E-Mail:
 --     Supporting Objects:  Included
 --   Version:         19.2.0.00.18
---   Instance ID:     69409115742119
+--   Instance ID:     199020291119630
 --
 
 prompt --application/delete_application
@@ -121,7 +121,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'APP_NAME'
 ,p_substitution_value_01=>'D.O.M.E.'
 ,p_last_updated_by=>'ZORAN'
-,p_last_upd_yyyymmddhh24miss=>'20230113185336'
+,p_last_upd_yyyymmddhh24miss=>'20230127204906'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_files_version=>3
 ,p_ui_type_name => null
@@ -24627,6 +24627,7 @@ wwv_flow_api.create_interactive_grid(
 ,p_requires_filter=>false
 ,p_show_nulls_as=>'-'
 ,p_select_first_row=>true
+,p_fixed_row_height=>true
 ,p_pagination_type=>'SCROLL'
 ,p_show_total_row_count=>true
 ,p_show_toolbar=>true
@@ -25190,6 +25191,7 @@ wwv_flow_api.create_interactive_grid(
 ,p_requires_filter=>false
 ,p_show_nulls_as=>'-'
 ,p_select_first_row=>true
+,p_fixed_row_height=>true
 ,p_pagination_type=>'SCROLL'
 ,p_show_total_row_count=>true
 ,p_show_toolbar=>true
@@ -25636,6 +25638,7 @@ wwv_flow_api.create_interactive_grid(
 ,p_requires_filter=>false
 ,p_show_nulls_as=>'-'
 ,p_select_first_row=>true
+,p_fixed_row_height=>true
 ,p_pagination_type=>'SCROLL'
 ,p_show_total_row_count=>true
 ,p_show_toolbar=>true
@@ -25923,6 +25926,7 @@ wwv_flow_api.create_interactive_grid(
 ,p_requires_filter=>false
 ,p_show_nulls_as=>'-'
 ,p_select_first_row=>true
+,p_fixed_row_height=>true
 ,p_pagination_type=>'SCROLL'
 ,p_show_total_row_count=>true
 ,p_show_toolbar=>true
@@ -26255,6 +26259,7 @@ wwv_flow_api.create_interactive_grid(
 ,p_requires_filter=>false
 ,p_show_nulls_as=>'-'
 ,p_select_first_row=>true
+,p_fixed_row_height=>true
 ,p_pagination_type=>'SCROLL'
 ,p_show_total_row_count=>true
 ,p_show_toolbar=>true
@@ -29223,6 +29228,7 @@ wwv_flow_api.create_interactive_grid(
 ,p_requires_filter=>false
 ,p_show_nulls_as=>'-'
 ,p_select_first_row=>true
+,p_fixed_row_height=>true
 ,p_pagination_type=>'SCROLL'
 ,p_show_total_row_count=>true
 ,p_show_toolbar=>true
@@ -29671,6 +29677,7 @@ wwv_flow_api.create_interactive_grid(
 ,p_requires_filter=>false
 ,p_show_nulls_as=>'-'
 ,p_select_first_row=>true
+,p_fixed_row_height=>true
 ,p_pagination_type=>'SCROLL'
 ,p_show_total_row_count=>true
 ,p_show_toolbar=>true
@@ -31429,7 +31436,7 @@ wwv_flow_api.create_page(
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
 ,p_last_updated_by=>'ZORAN'
-,p_last_upd_yyyymmddhh24miss=>'20221107133057'
+,p_last_upd_yyyymmddhh24miss=>'20230127204906'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5892890324453741)
@@ -31473,8 +31480,11 @@ unistr('<li>Hierarchical organization of patches (projects \2013 task groups \20
 '</p>',
 '<p>',
 '<h3>Contact:</h3>',
+'<a href="https://right-thing.solutions/" target="_blank">',
+'<img src="https://right-thing.solutions/ords/r/app/166/files/static/v197/TRT_logo.svg" width="300"><br>',
+'</a>',
 'Zoran Tica<br>',
-'Email: <a href="email:zoran.tica@gmail.com">zoran.tica@gmail.com</a><br>',
+'Email: <a href="email:zoran.tica@gmail.com">zoran.tica@right-thing.solutions</a><br>',
 '</p>'))
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 ,p_attribute_01=>'N'
@@ -32692,6 +32702,7 @@ wwv_flow_api.create_interactive_grid(
 ,p_requires_filter=>false
 ,p_show_nulls_as=>'-'
 ,p_select_first_row=>true
+,p_fixed_row_height=>true
 ,p_pagination_type=>'SCROLL'
 ,p_show_total_row_count=>true
 ,p_show_toolbar=>true
