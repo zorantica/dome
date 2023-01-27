@@ -58,16 +58,15 @@ Scripts:
 - 50 - APEX application.sql
 
 ### Installation Remarks
-Script no. 00 is optional and it helps to create database user / schema.
-
-If You are going to use this script please enter correct user name, password and tablespaces for Your database.
+Script no. 00 is optional and it helps to create DOME database user / schema. If You are going to use this script please enter correct user name, password and tablespaces for Your database.
 
 A user / schema, in which the DOME is installed, should have following roles and grants assigned:
 - APEX_ADMINISTRATOR_READ_ROLE role assigned
 - execute grant on dbms_crypto package
 - select grant on dba_objects view
+- select grant on dba_tab_columns view
 
-Script no. 06 is used to recompile the schema, in which DOME is installed, at the end of installation. Please provide a correct schema name.
+Script no. 06 is used to recompile the schema, in which DOME is installed, at the end of installation. Please provide a correct schema name and check invalid objects (should be none).
 
 Script no. 50 is APEX application script, which should be imported in appropriate workspace (using APEX GUI or from a client such as SQLcl, SQLPlus, SQL Developer...).
 
