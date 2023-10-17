@@ -40,8 +40,8 @@ Main features:
 ## How to install DOME
 It is strongly recommended to install DOME into separate database schema and provide only necessary grants.
 
-### Installation scripts
-Download scripts from "install" folder and install them in provided order.
+### Initial install
+Download scripts from "install/0000_initial_setup" folder and install them in provided order.
 
 Scripts: 
 - 00 - db user (optional).sql
@@ -67,6 +67,11 @@ A user / schema, in which the DOME is installed, should have following roles and
 Script no. 06 is used to recompile the schema, in which DOME is installed, at the end of installation. Please provide a correct schema name and check invalid objects (should be none).
 
 Script no. 50 is APEX application script, which should be imported in appropriate workspace (using APEX GUI or from a client such as SQLcl, SQLPlus, SQL Developer...).
+
+### Install upgrades
+Upgrades are located within main "install" folder and they are numbered from 0001 forward.
+
+Upgrades are incremental and should be installed one by another until the latest version. 
 
 ### First Login
 After all scripts are installed You should be able to login into DOME with username "admin" and password "admin".
