@@ -80,8 +80,8 @@ Manuals are located in the repository under the folder [manuals](manuals).
 
 There are also recorded videos on my YouTube channel.
 
-[Introduction to the D.O.M.E.](https://youtu.be/psi8gW_XSA8)
-[Let's get familiar woth the D.O.M.E.](https://youtu.be/bf6BWGIh9QY)
+- [Introduction to the D.O.M.E.](https://youtu.be/psi8gW_XSA8)
+- [Let's get familiar woth the D.O.M.E.](https://youtu.be/bf6BWGIh9QY)
 
 ## Quick preview
 ![](https://github.com/zorantica/dome/blob/main/preview/preview01.jpg)
