@@ -1,6 +1,7 @@
 # D.O.M.E. for Oracle *(Deployment Organization Made Easy)*
 
 **DOME for Oracle Database and APEX** is a powerful utility designed to streamline and accelerate development and deployment processes for teams working with PL/SQL and Oracle APEX.
+
 It provides a structured approach to organizing projects, simplifying the creation of installation / deployment scripts, and enhancing overall productivity, making it an essential tool for developers aiming to optimize their workflow.
 
 ### Main features:
@@ -55,26 +56,32 @@ The upgrade process is the same as the installation process. Just import the lat
 After the supporting objects installation You may encounter the message "Installation of database objects and seed data has failed."
 
 First, You should check the Install Summary. If the issues are related to views and packages only, like on the picure below, then it is fine. The problem is with the order of the views and packages generation and their in-between dependencies.
+
 ![](https://github.com/zorantica/dome/blob/main/Install_Summary.png)
 
 Second, check if there are any invalid DOME objects in the schema where the DOME is installed. There should be none because at the end of the supporting object scripts there is a script which recompiles all objects in the schema.  
 
 #### Roles and Grants
-A user / schema in which the DOME is installed should have granted following roles and grants:
+A user / schema in which the DOME is installed should have following roles and grants granted:
 - APEX_ADMINISTRATOR_READ_ROLE role
 - execute grant on dbms_crypto package
 - select grant on dba_objects view
 - select grant on dba_tab_columns view
 
-If You used the script from the install folder to create a new user then all those grants and roles should be correctly granted.
+*If You used the script from the install folder to create a new user then all those grants and roles should be correctly granted.*
 
 ### First Login in the DOME
 After the instalation You should be able to login into the DOME with the username "admin" and password "admin".
 
 Then You can configure the DOME for Your projects and users.
 
-## How to configure and use DOME
+## How to configure and use the DOME
 Manuals are located in the repository under the folder [manuals](manuals).
+
+There are also recorded videos on my YouTube channel.
+
+[Introduction to the D.O.M.E.](https://youtu.be/psi8gW_XSA8)
+[Let's get familiar woth the D.O.M.E.](https://youtu.be/bf6BWGIh9QY)
 
 ## Quick preview
 ![](https://github.com/zorantica/dome/blob/main/preview/preview01.jpg)
