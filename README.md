@@ -1,28 +1,31 @@
 # D.O.M.E. for Oracle 5.1 *(Deployment Organization Made Easy)*
 
-DOME for Oracle database and APEX is a utility, which helps developer teams developing in PL/SQL and APEX to organize and speed-up development and deployment processes and installation scripts production.
+**DOME for Oracle Database and APEX** is a powerful utility designed to streamline and accelerate development and deployment processes for teams working with PL/SQL and Oracle APEX.
+It provides a structured approach to organizing projects, simplifying the creation of installation / deployment scripts, and enhancing overall productivity, making it an essential tool for developers aiming to optimize their workflow.
 
-Main features:
-- Swift and automatic patch scripts generation
-- Records DDL operations in database schemas and stores them in appropriate patches
-- Multiple target environments definitions
-- Tracks “who did what”
-- Works on both APEX component level and APEX application level
-- Database and APEX objects versioning
-- Locking database objects and APEX pages
-- Handling concurrency during development
-- Linking patches (objects share)
-- Tracks deployment to different environments
-- Patch / release dependencies check
-- Script templates (single SQLPlus or SQLcl scripts, target GIT folders, OPAL tools...)
-- Quick overview of patches with search and filtering
-- Groups patches into releases
-- Prepares a release documentation
-- Hierarchical organization of patches (projects – task groups – tasks – patches)
-- Utilities such as: prepare installation scripts for binary files, source wrapping, export source (for GIT or other version control) 
+### Main features:
 
+- **Automated Patch Script Generation**: Quickly and automatically generate patch scripts to streamline development.
+- **DDL Operations Recording**: Captures and stores DDL statements executed in monitored database schemas, organizing them into appropriate patches.
+- **Multiple Environment Definitions**: Supports multiple target environments for flexible deployment configurations.
+- **Activity Tracking**: Monitors and tracks who made changes on objects and components and what was altered.
+- **APEX Component and Application Level Support**: Operates effectively on both individual APEX components and entire APEX applications.
+- **Database and APEX Object Versioning**: Manages versioning for both database and APEX objects.
+- **Object and Pages Locking**: Enables locking of database objects and APEX pages to prevent conflicts during development.
+- **Concurrency Management**: Handles concurrency issues during development, minimizing conflicts and ensuring smooth collaboration.
+- **Patch Linking**: Allows sharing of objects across patches, facilitating better integration and dependency management.
+- **Deployment Tracking**: Keeps track of deployments across different environments, ensuring accurate and consistent rollouts.
+- **Patch/Release Dependency Checking**: Verifies dependencies between patches and releases to prevent conflicts and ensure smooth deployments.
+- **Script Templates**: Provides templates for various deployment tools like single SQLPlus or SQLcl scripts, target GIT folders, OPAL tools...
+- **Patch Overview with Search and Filtering**: Offers a quick overview of patches with robust search and filtering capabilities for easy management.
+- **Patch Grouping into Releases**: Organizes patches into releases for more structured and efficient deployments.
+- **Release Documentation Preparation**: Automatically prepares detailed documentation for each release, ensuring thorough and accurate records.
+- **Hierarchical Patch Organization**: Structures patches within a hierarchy of projects, task groups, tasks, and patches for better organization.
+- **Various Utilities**: Includes utilities for preparing installation scripts for binary files, source wrapping, and exporting sources for GIT or other version control systems.
 
 ## Change Log
+*Complete Change Log can be found in the document [changelog.md](changelog.md).*
+- 5.2.0 - 6 new functionalities and 15 improvements / bug fixes
 - 5.1.0 - Export patch and release scripts for SQL Plus 
 - 5.0.0 - List of application objects changed by current user (helper to add application objects to patch)
 - 4.9.1 - Patch warnings (empty patch...) displayed on patch list
@@ -30,55 +33,48 @@ Main features:
 - 4.8.2 - Re-sequence patch scripts
 - 4.8.1 - Start / stop button on patch details page
 
-*Complete Change Log can be found in document [changelog.md](changelog.md).*
-
-
 ## Requirements
 - Oracle database 11g R2 or newer
 - Oracle APEX 19.2 or newer
 
-## How to install DOME
-It is strongly recommended to install DOME into separate database schema and provide only necessary grants.
+## How to install the DOME
+It is strongly recommended to install DOME into a separate database schema. This approach minimizes intrusion into your development schemas and eliminates the need for granting any unnecessary permissions.
 
-### Initial install
-Download scripts from "install/0000_initial_setup" folder and install them in provided order.
+The script for a DOME user creation named [DOME_DB_user.sql](install/DOME_DB_user.sql)can be located in the install folder.
 
-Scripts: 
-- 00 - db user (optional).sql
-- 01 - tables.sql
-- 02 - sequences.sql
-- 03 - triggers.sql
-- 04 - views.sql
-- 05 - packages.sql
-- 06 - recompile schema.sql
-- 20 - admin app user.sql
-- 25 - data.sql
-- 50 - APEX application.sql
+### The Installation or Upgrade Process
+In order to install a DOME just import the application in Your desired workspace and install supporting objects.
 
-### Installation Remarks
-Script no. 00 is optional and it helps to create DOME database user / schema. If You are going to use this script please enter correct user name, password and tablespaces for Your database.
+The application and supporting objects are joined in a single installation file [dome.sql](install/dome.sql) which can be located in the install folder.
 
-A user / schema, in which the DOME is installed, should have following roles and grants assigned:
-- APEX_ADMINISTRATOR_READ_ROLE role assigned
+The upgrade process is actually the same as the installation process. Just import the newer version of the DOME application and overwrite the existing DOME application. During the process upgrade the supporting objects and that's it.
+
+### Installation and Upgrade Remarks
+
+#### "Installation of database objects and seed data has failed." message
+After the supporting objects installation You may encounter the message "Installation of database objects and seed data has failed."
+
+First, You should check the Install Summary. If the issues are related to views and packages only, like on the picure below, then it is fine. The problem is with the order of the views and packages generation and their in-between dependencies.
+![install_summary.png](install_summary.png)
+
+Second, check if there are any invalid DOME objects in the schema where the DOME is installed. There should be none because at the end of the supporting object scripts there is a script which recompiles all objects in the schema.  
+
+#### Roles and Grants
+A user / schema in which the DOME is installed should have granted following roles and grants:
+- APEX_ADMINISTRATOR_READ_ROLE role
 - execute grant on dbms_crypto package
 - select grant on dba_objects view
 - select grant on dba_tab_columns view
 
-Script no. 06 is used to recompile the schema, in which DOME is installed, at the end of installation. Please provide a correct schema name and check invalid objects (should be none).
+If You used the script from the install folder to create a new user then all those grants and roles should be correctly granted.
 
-Script no. 50 is APEX application script, which should be imported in appropriate workspace (using APEX GUI or from a client such as SQLcl, SQLPlus, SQL Developer...).
+### First Login in the DOME
+After the instalation You should be able to login into the DOME with the username "admin" and password "admin".
 
-### Install upgrades
-Upgrades are located within main "install" folder and they are numbered from 0001 forward.
-
-Upgrades are incremental and should be installed one by another until the latest version. 
-
-### First Login
-After all scripts are installed You should be able to login into DOME with username "admin" and password "admin".
+Then You can configure the DOME for Your projects and users.
 
 ## How to configure and use DOME
-Manuals are located in repository under folder "manuals".
-
+Manuals are located in the repository under the folder [manuals](manuals).
 
 ## Quick preview
 ![](https://github.com/zorantica/dome/blob/main/preview/preview01.jpg)
