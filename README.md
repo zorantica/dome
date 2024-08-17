@@ -45,9 +45,9 @@ For a DOME user creation You may use the script named [DOME_DB_user.sql](install
 ### The Installation or Upgrade Process
 In order to install a DOME just import the application in Your desired workspace and install supporting objects.
 
-The application and supporting objects are joined in a single installation file [dome.sql](install/dome.sql) which can be located in the install folder.
+The application and supporting objects are joined in a single installation file [dome.sql](install/dome.sql) which can be located in the [install](install) folder.
 
-The upgrade process is actually the same as the installation process. Just import the newer version of the DOME application and overwrite the existing DOME application. During the process upgrade the supporting objects and that's it.
+The upgrade process is the same as the installation process. Just import the latest version of the DOME application and overwrite the existing DOME application. During the process upgrade the supporting objects and that's it.
 
 ### Installation and Upgrade Remarks
 
@@ -55,7 +55,7 @@ The upgrade process is actually the same as the installation process. Just impor
 After the supporting objects installation You may encounter the message "Installation of database objects and seed data has failed."
 
 First, You should check the Install Summary. If the issues are related to views and packages only, like on the picure below, then it is fine. The problem is with the order of the views and packages generation and their in-between dependencies.
-![install_summary.png](install_summary.png)
+![blob/main/install_summary.png](blob/main/install_summary.png)
 
 Second, check if there are any invalid DOME objects in the schema where the DOME is installed. There should be none because at the end of the supporting object scripts there is a script which recompiles all objects in the schema.  
 
