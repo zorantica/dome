@@ -55,7 +55,7 @@ The upgrade process is the same as the installation process. Just import the lat
 After the supporting objects installation You may encounter the message "Installation of database objects and seed data has failed."
 
 First, You should check the Install Summary. If the issues are related to views and packages only, like on the picure below, then it is fine. The problem is with the order of the views and packages generation and their in-between dependencies.
-![blob/main/install_summary.png](install_summary.png)
+![blob/main/Install_Summary.png](blob/main/Install_Summary.png)
 
 Second, check if there are any invalid DOME objects in the schema where the DOME is installed. There should be none because at the end of the supporting object scripts there is a script which recompiles all objects in the schema.  
 
