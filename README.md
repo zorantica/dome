@@ -38,9 +38,9 @@ It provides a structured approach to organizing projects, simplifying the creati
 - Oracle APEX 19.2 or newer
 
 ## How to install the DOME
-It is strongly recommended to install DOME into a separate database schema. This approach minimizes intrusion into your development schemas and eliminates the need for granting any unnecessary permissions.
+It is strongly recommended to install the DOME in a separate database schema. This approach minimizes intrusion into your development schemas and eliminates the need for granting any unnecessary permissions.
 
-The script for a DOME user creation named [DOME_DB_user.sql](install/DOME_DB_user.sql)can be located in the install folder.
+For a DOME user creation You may use the script named [DOME_DB_user.sql](install/DOME_DB_user.sql) located in the [install](install) folder.
 
 ### The Installation or Upgrade Process
 In order to install a DOME just import the application in Your desired workspace and install supporting objects.
