@@ -1,3 +1,0 @@
-CREATE OR REPLACE TYPE coll_dome_num
-AS TABLE OF NUMBER
-/
