@@ -52,7 +52,7 @@ For a DOME user creation You may use the script named [DOME_DB_user.sql](install
 ### The Installation or Upgrade Process
 In order to install a DOME just import the application in Your desired workspace and install supporting objects.
 
-The application and supporting objects are joined in a single installation file [dome.sql](install/dome.sql) which can be located in the [install](install) folder.
+The application and supporting objects are joined in a single installation file [dome.sql](https://github.com/zorantica/dome/blob/main/install/dome.sql) which can be located in the [install](install) folder.
 
 The upgrade process is the same as the installation process. Just import the latest version of the DOME application and overwrite the existing DOME application. During the process upgrade the supporting objects and that's it.
 
