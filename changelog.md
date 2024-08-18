@@ -8,13 +8,16 @@
 - Display an object script from the object history
 - 2 object script versions comparison (using Monaco VS plugin)
 - Generate scripts for schema monitoring setup
+- A new DOME Installation Process using APEX Supporting Objects
 
 ### Improvements and bug fixes:
 - Patch details page - Corrent next patch number within the same task
 - Patch details page - "Automatic Y/N" flag for the new patch
 - Object history overview page - added a column "installed on environments" 
 - Releases page - interactive report - added a column "release date"
-- Patches lsit page - Refresh patches report region after including patches in the release
+- Patches list page - Refresh patches report region after including patches in the release
+- Patches list page - Improved IR layout (control break, order by, columns...)
+- Patches list page - "Installed on" column without escaping special characters
 - Patch details page - Improved default layout on Applications and Components region
 - Patch details page - Added components concurrency control when adding a component to the patch from Select components page
 - Patch details page - Automatic Refresh of components after selecting on Applications and Components region
@@ -25,6 +28,7 @@
 - Unified history column label name through the application
 - History page - Displayed a selected object name
 - Patch details page - changes warning solved
+- SQLPLUS template - a few bugs solved (BAT file content, installation start/end evidence...)
 
 
 
