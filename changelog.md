@@ -1,36 +1,46 @@
 # Change Log
 
-## 5.2.0
-### New functionalities:
-- Multilanguage support for applications and components export
-- Patch and object scripts search
-- Modernized code editor (Monaco VS plugin)
-- Display an object script from the object history
-- 2 object script versions comparison (using Monaco VS plugin)
-- Generate scripts for schema monitoring setup
-- A new DOME Installation Process using APEX Supporting Objects
+## 6.0.0
+### New Major Functionalities:
+- **Multilanguage support** for applications and components export
+- **Patch and object scripts search** functionality
+- **Modernized code editor** using the Monaco VS plugin by Ronny Weiss
+- **Display object script** from the object history
+- **Comparison of two object script versions** with Monaco VS plugin by Ronny Weiss
+- **Generate scripts** for schema monitoring setup
+- **New DOME Installation Process** using APEX Supporting Objects
 
 ### Improvements and bug fixes:
-- Patch details page - Corrent next patch number within the same task
-- Patch details page - "Automatic Y/N" flag for the new patch
-- Object history overview page - added a column "installed on environments" 
-- Releases page - interactive report - added a column "release date"
-- Patches list page - Refresh patches report region after including patches in the release
-- Patches list page - Improved IR layout (control break, order by, columns...)
-- Patches list page - "Installed on" column without escaping special characters
-- Patch details page - Improved default layout on Applications and Components region
-- Patch details page - Added components concurrency control when adding a component to the patch from Select components page
-- Patch details page - Automatic Refresh of components after selecting on Applications and Components region
-- Replace special characters " and ' in the file name of the produced patch
-- Patch details page - Cancel button navigation
-- Object history page - Added a link to patch details page
-- Patch details page - Unified icons for columns
-- Unified history column label name through the application
-- History page - Displayed a selected object name
-- Patch details page - changes warning solved
-- SQLPLUS template - a few bugs solved (BAT file content, installation start/end evidence...)
 
+#### Patch details page
+- Correct next patch number within the same task.
+- Added "Automatic Y/N" flag for the new patch.
+- Improved default layout on Applications and Components region.
+- Added components concurrency control when adding from Select components page.
+- Automatic refresh of components after selecting in Applications and Components region.
+- Replace special characters " and ' in the file name of the produced patch.
+- Added Cancel button navigation.
+- Unified icons for columns.
+- Solved changes warning.
 
+#### Object history overview page
+- Added a column "installed on environments."
+- Added a link to the patch details page.
+
+#### Releases page
+- Interactive report: added a "release date" column.
+
+#### Patches list page
+- Refresh patches report region after including patches in the release.
+- Improved IR layout (control break, order by, columns, etc.).
+- "Installed on" column without escaping special characters.
+
+#### History page
+- Unified history column label names throughout the application.
+- Displayed the selected object name.
+
+#### SQLPLUS template
+- Solved a few bugs (BAT file content, installation start/end evidence).
 
 ## Previous versions
 - 5.1.0 - Export patch and release scripts for SQL Plus 
