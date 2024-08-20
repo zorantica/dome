@@ -40,7 +40,7 @@
 - Displayed the selected object name.
 
 #### SQLPLUS template
-- Solved a few bugs (BAT file content, installation start/end evidence).
+- Solved few bugs (BAT file content, installation start/end evidence).
 
 ## Previous versions
 - 5.1.0 - Export patch and release scripts for SQL Plus 
