@@ -26,7 +26,7 @@ It provides a structured approach to organizing projects, simplifying the creati
 
 ## Change Log
 *Complete Change Log can be found in the document [changelog.md](changelog.md).*
-- 5.2.0 - 7 new major functionalities and cca 20 improvements / bug fixes
+- 6.0.0 - 7 new major functionalities and cca 20 improvements / bug fixes
 - 5.1.0 - Export patch and release scripts for SQL Plus 
 - 5.0.0 - List of application objects changed by current user (helper to add application objects to patch)
 - 4.9.1 - Patch warnings (empty patch...) displayed on patch list
