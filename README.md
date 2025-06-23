@@ -42,7 +42,8 @@ It provides a structured approach to organizing projects, simplifying the creati
 For a guidance on using D.O.M.E. and understanding its features, please visit our YouTube channel where you'll find helpful instructional videos.
 
 - [Introduction to the D.O.M.E.](https://youtu.be/psi8gW_XSA8)
-- [Let's get familiar woth the D.O.M.E.](https://youtu.be/bf6BWGIh9QY)
+- [Let's get familiar with the D.O.M.E.](https://youtu.be/bf6BWGIh9QY)
+- [How to install the D.O.M.E.](https://youtu.be/HzDjPasU4OY)
 
 ## How to install the DOME
 It is strongly recommended to install the DOME in a separate database schema. This approach minimizes intrusion into your development schemas and eliminates the need for granting any unnecessary permissions.
